@@ -2,7 +2,7 @@
 
 <img src="https://img.shields.io/badge/VENGAM-Auditor-22c55e?style=for-the-badge&labelColor=0b0e0b&color=22c55e" alt="VENGAM Auditor">
 
-
+<img width="1408" height="317" alt="vg_logo" src="https://github.com/user-attachments/assets/a85ab3e2-2e68-4bdc-a910-d2adb8f67c7e" />
 
 ### Professional Mobile Game Security Analysis Platform
 
