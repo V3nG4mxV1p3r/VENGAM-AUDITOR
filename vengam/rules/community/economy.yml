@@ -1,0 +1,137 @@
+# VENGAM — Community Rules: Game Economy
+# Araştırmacılar bu dosyayı kopyalayıp özelleştirebilir.
+# Format: YAML multi-document (--- ile ayrılır)
+
+---
+id: VENGAM-ECO-001
+title: "Hardcoded Economy Multiplier"
+description: >
+  Oyun içi para birimi veya puan çarpanı kodda sabit olarak tanımlanmış.
+  Bellek düzenleyiciyle değiştirilebilir.
+severity: HIGH
+confidence: MEDIUM
+category: Economy
+platform: android
+tags: [economy, memory-hack, multiplier]
+score_value: 20
+
+detection:
+  patterns:
+    - '(?i)(gold|coin|gem|currency|score)[_\s]*(multiplier|mult|factor)\s*[=:]\s*\d+'
+    - '(?i)(MULTIPLIER|BONUS_RATE|REWARD_MULT)\s*=\s*[0-9]+'
+  file_ext: [.smali, .java, .kt]
+
+context:
+  require_keywords: [game, economy, player, score, currency]
+  exclude_paths: [androidx, com/google, io/flutter]
+
+simulation: >
+  Saldırgan bellek adresini tespit edip çarpanı MAX_INT olarak ayarlar.
+  Sunucu doğrulaması yoksa tüm ekonomi çöker.
+triage_note: >
+  Tüm çarpan değerleri sunucu tarafında doğrulanmalı.
+  Client'tan gelen değerlere güvenilmemeli.
+frida_hook: |
+  // Economy multiplier hook
+  Java.perform(function() {
+    var classes = Java.enumerateLoadedClassesSync();
+    classes.forEach(function(cls) {
+      if (cls.toLowerCase().includes('economy') || cls.toLowerCase().includes('currency')) {
+        try {
+          var C = Java.use(cls);
+          // Field'ları logla
+          send({tag:'ECONOMY', msg: 'Class found: ' + cls});
+        } catch(_) {}
+      }
+    });
+  });
+cvss_vector: "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+cwe_id: "CWE-602"
+owasp_ref: "M1: Improper Platform Usage"
+references:
+  - https://owasp.org/www-project-mobile-top-10/
+
+---
+id: VENGAM-ECO-002
+title: "Offline Purchase Validation"
+description: >
+  Satın alma doğrulaması çevrimdışı veya client-side yapılıyor.
+  Sunucu doğrulaması olmadan sahte satın alma mümkün.
+severity: CRITICAL
+confidence: HIGH
+category: Economy
+platform: both
+tags: [economy, iap, offline-validation]
+score_value: 35
+
+detection:
+  patterns:
+    - '(?i)(offline|local|client)[_\s]*(purchase|receipt|payment)[_\s]*(valid|check|verify)'
+    - '(?i)(validateLocally|localReceiptCheck|offlinePurchase)'
+    - '(?i)(OFFLINE_MODE|LOCAL_VALIDATION)\s*=\s*(true|1)'
+
+context:
+  exclude_paths: [test, debug, sample]
+
+simulation: >
+  Saldırgan Burp Suite ile receipt isteğini yakalar, sahte receipt gönderir.
+  Sunucu doğrulaması olmadığı için premium içerik ücretsiz alınır.
+triage_note: >
+  TÜM receipt doğrulaması Apple/Google sunucularına karşı yapılmalı.
+  Client'tan gelen 'purchase successful' mesajına ASLA güvenme.
+frida_hook: |
+  Java.perform(function() {
+    ['verifyPurchase','validateReceipt','checkPurchase','verifyLocally'].forEach(function(m) {
+      Java.enumerateLoadedClasses({
+        onMatch: function(name) {
+          try {
+            var C = Java.use(name);
+            if (C[m]) {
+              C[m].overloads.forEach(function(o) {
+                o.implementation = function() {
+                  send({tag:'IAP_VALIDATION', msg: name+'.'+m+'() intercepted'});
+                  return o.apply(this, arguments);
+                };
+              });
+            }
+          } catch(_) {}
+        }, onComplete: function() {}
+      });
+    });
+  });
+cvss_vector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+cwe_id: "CWE-345"
+owasp_ref: "M5: Insufficient Cryptography"
+
+---
+id: VENGAM-ECO-003
+title: "Hardcoded Max Currency Value"
+description: >
+  Maksimum para birimi miktarı client-side sabit olarak tanımlanmış.
+  MAX_GOLD, MAX_GEMS gibi değerler bellek editörüyle değiştirilebilir.
+severity: HIGH
+confidence: MEDIUM
+category: Economy
+platform: android
+tags: [economy, max-value, memory-hack]
+score_value: 18
+
+detection:
+  patterns:
+    - '(?i)(MAX_GOLD|MAX_GEMS|MAX_COINS|MAX_CURRENCY|MAX_BALANCE)\s*[=:]\s*\d+'
+    - '(?i)(maxGold|maxGems|maxCoins|maxBalance)\s*=\s*\d+'
+    - '(?i)Integer\.MAX_VALUE.*?(gold|gem|coin|currency|balance)'
+
+context:
+  require_keywords: [game, gold, gem, coin, currency, balance]
+  exclude_paths: [androidx, test]
+
+simulation: >
+  Saldırgan MAX_GOLD değerini bellekte değiştirir ve
+  overflow/underflow ile sınırsız kaynak elde eder.
+triage_note: >
+  Maksimum değerler sunucu tarafında tanımlanmalı ve zorlanmalı.
+  Client'taki değerler sadece UI ipucu olmalı.
+cvss_vector: "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:M/A:N"
+cwe_id: "CWE-602"
+owasp_ref: "M1: Improper Platform Usage"

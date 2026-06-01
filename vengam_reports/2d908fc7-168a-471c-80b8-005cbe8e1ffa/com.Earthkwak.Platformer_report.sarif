@@ -1,0 +1,388 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "VENGAM Auditor",
+          "version": "7.0.0",
+          "informationUri": "https://github.com/vengam/gamesec",
+          "rules": [
+            {
+              "id": "ExposedHighEntropyUnknownAsset",
+              "name": "Exposed High-Entropy Unknown Asset",
+              "shortDescription": {
+                "text": "Exposed High-Entropy Unknown Asset"
+              },
+              "fullDescription": {
+                "text": "High Shannon entropy string detected near security-sensitive keyword."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "general"
+                ],
+                "precision": "high",
+                "security-severity": "9.8"
+              }
+            },
+            {
+              "id": "DebugGodModeFlag",
+              "name": "Debug / God Mode Flag",
+              "shortDescription": {
+                "text": "Debug / God Mode Flag"
+              },
+              "fullDescription": {
+                "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "anticheat"
+                ],
+                "precision": "medium",
+                "security-severity": "7.5"
+              }
+            },
+            {
+              "id": "UnclassifiedHighEntropyAsset",
+              "name": "Unclassified High-Entropy Asset",
+              "shortDescription": {
+                "text": "Unclassified High-Entropy Asset"
+              },
+              "fullDescription": {
+                "text": "High Shannon entropy string detected near security-sensitive keyword."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "general"
+                ],
+                "precision": "low",
+                "security-severity": "5.0"
+              }
+            },
+            {
+              "id": "InsecureRandomNumberGenerator",
+              "name": "Insecure Random Number Generator",
+              "shortDescription": {
+                "text": "Insecure Random Number Generator"
+              },
+              "fullDescription": {
+                "text": "java.util.Random or Math.random() used in a security context — not cryptographically secure."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "general"
+                ],
+                "precision": "medium",
+                "security-severity": "2.0"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "ExposedHighEntropyUnknownAsset",
+          "level": "error",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker probes backend routes using the extracted string as bearer or seed material."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/com/mbridge/msdk/config/component/wei/monitor/a.smali"
+                },
+                "region": {
+                  "startLine": 33
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "ExposedHighEntropyUnknownAsset",
+          "level": "error",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker probes backend routes using the extracted string as bearer or seed material."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/com/mbridge/msdk/config/component/wei/monitor/a.smali"
+                },
+                "region": {
+                  "startLine": 33
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DebugGodModeFlag",
+          "level": "error",
+          "message": {
+            "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime. | Attacker locates the memory address and toggles the flag for unfair advantage."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/androidx/constraintlayout/motion/widget/MotionLayout.smali"
+                },
+                "region": {
+                  "startLine": 2214
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DebugGodModeFlag",
+          "level": "error",
+          "message": {
+            "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime. | Attacker locates the memory address and toggles the flag for unfair advantage."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/androidx/constraintlayout/motion/widget/MotionLayout.smali"
+                },
+                "region": {
+                  "startLine": 2221
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DebugGodModeFlag",
+          "level": "error",
+          "message": {
+            "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime. | Attacker locates the memory address and toggles the flag for unfair advantage."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/com/apm/insight/runtime/ConfigManager.smali"
+                },
+                "region": {
+                  "startLine": 47
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DebugGodModeFlag",
+          "level": "error",
+          "message": {
+            "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime. | Attacker locates the memory address and toggles the flag for unfair advantage."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/com/apm/insight/runtime/ConfigManager.smali"
+                },
+                "region": {
+                  "startLine": 415
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DebugGodModeFlag",
+          "level": "error",
+          "message": {
+            "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime. | Attacker locates the memory address and toggles the flag for unfair advantage."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/com/apm/insight/runtime/ConfigManager.smali"
+                },
+                "region": {
+                  "startLine": 525
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "UnclassifiedHighEntropyAsset",
+          "level": "warning",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker reverse-engineers data to determine if it acts as seed or endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes2/com/google/android/gms/internal/ads/zzban.smali"
+                },
+                "region": {
+                  "startLine": 226
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "UnclassifiedHighEntropyAsset",
+          "level": "warning",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker reverse-engineers data to determine if it acts as seed or endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes2/com/google/android/gms/internal/ads/zzban.smali"
+                },
+                "region": {
+                  "startLine": 275
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "UnclassifiedHighEntropyAsset",
+          "level": "warning",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker reverse-engineers data to determine if it acts as seed or endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes2/com/google/android/gms/internal/ads/zzban.smali"
+                },
+                "region": {
+                  "startLine": 285
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "UnclassifiedHighEntropyAsset",
+          "level": "warning",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker reverse-engineers data to determine if it acts as seed or endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes2/com/google/android/gms/internal/ads/zzban.smali"
+                },
+                "region": {
+                  "startLine": 298
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "UnclassifiedHighEntropyAsset",
+          "level": "warning",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker reverse-engineers data to determine if it acts as seed or endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes2/com/google/android/gms/internal/ads/zzban.smali"
+                },
+                "region": {
+                  "startLine": 382
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "InsecureRandomNumberGenerator",
+          "level": "note",
+          "message": {
+            "text": "java.util.Random or Math.random() used in a security context — not cryptographically secure. | Attacker predicts token generation sequence or game seed."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/com/bytedance/sdk/openadsdk/core/orl/sk.smali"
+                },
+                "region": {
+                  "startLine": 34
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "InsecureRandomNumberGenerator",
+          "level": "note",
+          "message": {
+            "text": "java.util.Random or Math.random() used in a security context — not cryptographically secure. | Attacker predicts token generation sequence or game seed."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/com/mbridge/msdk/config/component/wei/monitor/a.smali"
+                },
+                "region": {
+                  "startLine": 33
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "InsecureRandomNumberGenerator",
+          "level": "note",
+          "message": {
+            "text": "java.util.Random or Math.random() used in a security context — not cryptographically secure. | Attacker predicts token generation sequence or game seed."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes3/com/mbridge/msdk/setting/util/b.smali"
+                },
+                "region": {
+                  "startLine": 280
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

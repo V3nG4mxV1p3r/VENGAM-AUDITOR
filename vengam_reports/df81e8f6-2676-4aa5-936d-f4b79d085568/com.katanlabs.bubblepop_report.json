@@ -1,0 +1,365 @@
+{
+  "schema_version": "vengam-v7",
+  "tool": "VENGAM Auditor",
+  "tool_version": "7.0.0",
+  "platform": "android",
+  "apk_name": "com.katanlabs.bubblepop.apk",
+  "apk_sha256": "faca1c8d5bd216072a9658bfe002b94b18d59d395a11ed39f2b4d1f77662a13c",
+  "scan_timestamp": "2026-05-12T17:06:21.435284Z",
+  "risk_score": 100,
+  "verdict": "BLOCK RELEASE",
+  "engine_stats": {
+    "files_scanned": 52494,
+    "lines_scanned": 12915679,
+    "fp_suppressed": 55788,
+    "patterns_run": 37,
+    "scan_duration_sec": 485.44
+  },
+  "findings": [
+    {
+      "title": "Google / Firebase API Key",
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "exploitability": "CONFIRMED",
+      "secret_type": "Cloud API Key",
+      "description": "A Google/Firebase API key embedded in the binary may grant access to Firebase RTDB, Cloud Storage, or GCP services based on IAM permissions.",
+      "simulation": "Attacker calls Firebase REST API to attempt unauthenticated read/write on the database.",
+      "score_value": 30,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+      "cwe_id": "CWE-798",
+      "owasp_ref": "M9: Insecure Data Storage",
+      "category": "General",
+      "triage_note": "Verify Firebase security rules — key alone may not grant write access if rules require auth.",
+      "locations": [
+        {
+          "file": "assets\\google-services-desktop.json",
+          "line": 32,
+          "snippet": "\"current_key\": \"AIzaSyAFmASCxN9-Sk2HV3lSMsTVGLQNQvKIjfM\"",
+          "redacted_match": "AIza*******************************IjfM"
+        },
+        {
+          "file": "res\\values\\strings.xml",
+          "line": 135,
+          "snippet": "<string name=\"google_api_key\">AIzaSyAFmASCxN9-Sk2HV3lSMsTVGLQNQvKIjfM</string>",
+          "redacted_match": "AIza*******************************IjfM"
+        },
+        {
+          "file": "res\\values\\strings.xml",
+          "line": 137,
+          "snippet": "<string name=\"google_crash_reporting_api_key\">AIzaSyAFmASCxN9-Sk2HV3lSMsTVGLQNQvKIjfM</string>",
+          "redacted_match": "AIza*******************************IjfM"
+        }
+      ]
+    },
+    {
+      "title": "Debug / God Mode Flag",
+      "severity": "HIGH",
+      "confidence": "MEDIUM",
+      "exploitability": "LIKELY",
+      "secret_type": "Debug Flag",
+      "description": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime.",
+      "simulation": "Attacker locates the memory address and toggles the flag for unfair advantage.",
+      "score_value": 20,
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+      "cwe_id": "CWE-489",
+      "owasp_ref": "M10: Extraneous Functionality",
+      "category": "AntiCheat",
+      "triage_note": "Verify file is game-specific (not a third-party debug library). Remove before release.",
+      "locations": [
+        {
+          "file": "smali\\androidx\\constraintlayout\\motion\\widget\\DesignTool.smali",
+          "line": 2438,
+          "snippet": "\"debugMode\"",
+          "redacted_match": "***REDACTED***"
+        },
+        {
+          "file": "smali\\androidx\\constraintlayout\\motion\\widget\\MotionController.smali",
+          "line": 5252,
+          "snippet": "\"debugMode\"",
+          "redacted_match": "***REDACTED***"
+        },
+        {
+          "file": "smali\\androidx\\constraintlayout\\motion\\widget\\MotionLayout.smali",
+          "line": 5800,
+          "snippet": ".method public getDebugMode(Z)V",
+          "redacted_match": "***REDACTED***"
+        },
+        {
+          "file": "smali\\androidx\\constraintlayout\\motion\\widget\\MotionLayout.smali",
+          "line": 8666,
+          "snippet": ".method public setDebugMode(I)V",
+          "redacted_match": "***REDACTED***"
+        },
+        {
+          "file": "smali\\androidx\\constraintlayout\\motion\\widget\\MotionLayout.smali",
+          "line": 8673,
+          "snippet": "\"debugMode\"",
+          "redacted_match": "***REDACTED***"
+        }
+      ]
+    },
+    {
+      "title": "Exported Component Without Permission",
+      "severity": "MEDIUM",
+      "confidence": "MEDIUM",
+      "exploitability": "LIKELY",
+      "secret_type": "Android Manifest Misconfiguration",
+      "description": "Activity/Service/Provider exported without a permission guard. Other apps can invoke it directly.",
+      "simulation": "Attacker app invokes the exported component with crafted Intent to access game data.",
+      "score_value": 10,
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:M/I:M/A:N",
+      "cwe_id": "CWE-926",
+      "owasp_ref": "M1: Improper Platform Usage",
+      "category": "Config",
+      "triage_note": "Add android:permission or set android:exported=false for internal components.",
+      "locations": [
+        {
+          "file": "AndroidManifest.xml",
+          "line": 69,
+          "snippet": "<provider android:authorities=\"com.facebook.app.FacebookContentProvider1051443353666622\" android:exported=\"true\" android",
+          "redacted_match": "andr***************rue\""
+        },
+        {
+          "file": "AndroidManifest.xml",
+          "line": 93,
+          "snippet": "<activity android:exported=\"true\" android:name=\"com.facebook.unity.FBUnityAppLinkActivity\"/>",
+          "redacted_match": "andr***************rue\""
+        },
+        {
+          "file": "AndroidManifest.xml",
+          "line": 94,
+          "snippet": "<activity android:exported=\"true\" android:name=\"com.facebook.unity.FBUnityDeepLinkingActivity\"/>",
+          "redacted_match": "andr***************rue\""
+        },
+        {
+          "file": "AndroidManifest.xml",
+          "line": 107,
+          "snippet": "<activity android:exported=\"true\" android:name=\"com.facebook.CustomTabActivity\">",
+          "redacted_match": "andr***************rue\""
+        },
+        {
+          "file": "AndroidManifest.xml",
+          "line": 190,
+          "snippet": "<provider android:authorities=\"com.katanlabs.bubblepop.appmetrica.preloadinfo.retail\" android:enabled=\"true\" android:exp",
+          "redacted_match": "andr***************rue\""
+        }
+      ]
+    },
+    {
+      "title": "Unclassified High-Entropy Asset",
+      "severity": "MEDIUM",
+      "confidence": "LOW",
+      "exploitability": "THEORETICAL",
+      "secret_type": "Obfuscated Data",
+      "description": "High Shannon entropy string detected near security-sensitive keyword.",
+      "simulation": "Attacker reverse-engineers data to determine if it acts as seed or endpoint.",
+      "score_value": 5,
+      "cvss_vector": "",
+      "cwe_id": "CWE-798",
+      "owasp_ref": "M9: Insecure Data Storage",
+      "category": "General",
+      "triage_note": "Verify this is not a Base64 alphabet, resource ID, or SDK constant.",
+      "locations": [
+        {
+          "file": "smali_classes2\\com\\bytedance\\sdk\\openadsdk\\component\\reward\\to.smali",
+          "line": 16,
+          "snippet": "const-string v2, \"{\\n\\t\\t\\\"ad_id\\\": \\\"1639941324071955\\\",\\n\\t\\t\\\"app\\\": {\\n\\t\\t\\t\\\"app_name\\\": \\\"Mortals cultivate Immor",
+          "redacted_match": "http*****************************************************************************************************************************************************%3D\\"
+        },
+        {
+          "file": "smali_classes3\\com\\google\\android\\gms\\internal\\ads\\zzawy.smali",
+          "line": 456,
+          "snippet": "const-string v1, \"01PVhP+doaGKdC1W6GrY+2IWUVFKtg3RWpQDin/wN/cS8wkuezVXqSDwZNREySxt\"",
+          "redacted_match": "01PV********************************************************ySxt"
+        },
+        {
+          "file": "smali_classes3\\com\\google\\android\\gms\\internal\\ads\\zzawy.smali",
+          "line": 548,
+          "snippet": "const-string v1, \"6Tbgi6IQESKZikJOpZcClcVJxza1rhAf3nfasZu/vDcTd3loITpTNbH23xjyLA5L\"",
+          "redacted_match": "6Tbg********************************************************LA5L"
+        },
+        {
+          "file": "smali_classes3\\com\\google\\android\\gms\\internal\\ads\\zzawy.smali",
+          "line": 625,
+          "snippet": "const-string v1, \"ffEAQyBH71yR4B2obQT/Qgb3Fo0ajWwFYmmZt2nfIS2fjNh6ir76IWAmhSUkzxpD\"",
+          "redacted_match": "ffEA********************************************************zxpD"
+        },
+        {
+          "file": "smali_classes3\\com\\google\\android\\gms\\internal\\ads\\zzawy.smali",
+          "line": 682,
+          "snippet": "const-string v1, \"YJMz4lZ/SFOXN6kW19UKnvAqcLtndNv4f6er9d24/5MuXcrsMTIC+9Jfbhpe2HMW\"",
+          "redacted_match": "YJMz********************************************************2HMW"
+        }
+      ]
+    },
+    {
+      "title": "Insecure Random Number Generator",
+      "severity": "LOW",
+      "confidence": "MEDIUM",
+      "exploitability": "THEORETICAL",
+      "secret_type": "Weak Cryptography",
+      "description": "java.util.Random or Math.random() used in a security context — not cryptographically secure.",
+      "simulation": "Attacker predicts token generation sequence or game seed.",
+      "score_value": 5,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+      "cwe_id": "CWE-330",
+      "owasp_ref": "M5: Insufficient Cryptography",
+      "category": "General",
+      "triage_note": "Use SecureRandom for any security-relevant randomness.",
+      "locations": [
+        {
+          "file": "smali_classes2\\com\\bytedance\\sdk\\openadsdk\\core\\fs\\mzz.smali",
+          "line": 303,
+          "snippet": "const-string v0, \";(function(omidGlobal) {\\n  var m;function aa(a){var b=0;return function(){return b<a.length?{done:!1,",
+          "redacted_match": "Math*****om()"
+        },
+        {
+          "file": "smali_classes6\\yads\\qu3.smali",
+          "line": 289,
+          "snippet": "const-string v0, \";(function(omidGlobal) {\\n  \\'use strict\\';var n;function aa(a){var b=0;return function(){return b<a.l",
+          "redacted_match": "Math*****om()"
+        }
+      ]
+    }
+  ],
+  "dynamic_findings": [],
+  "attack_surface": {
+    "auth": [
+      "/auth/datastoremobile",
+      "/auth/plus.login",
+      "/auth/userinfo.email",
+      "login.yahoo.com",
+      "/auth/appstate",
+      "/auth/drive.appdata",
+      "/auth/drive.apps",
+      "/auth/drive.file",
+      "/auth/drive",
+      "/auth/games.firstparty",
+      "login.live.com",
+      "/auth/games",
+      "/auth/userinfo.profile",
+      "/auth/games_lite",
+      "/auth/plus.me"
+    ],
+    "payment": [
+      "www.paypal.com"
+    ],
+    "user_data": [
+      "/issues/player-accessed-on-wrong-thread",
+      "/o/account"
+    ],
+    "internal_api": [
+      "/service/2/app_log/",
+      "/v1/stats/sdk",
+      "/api/ad/union/sdk/get_ads/",
+      "/api/v1/app_sdk/config",
+      "/api/ads",
+      "/recaptcha/api3"
+    ],
+    "other": [
+      "/dev/mobile-ads/doc/intro/changelog-android.html",
+      "www.facebook.com",
+      "/obj/ad-pattern-tx/renderer/package_tx.json",
+      "subscription.",
+      "www.linkedin.com",
+      "default.url",
+      "/mads/static/mad/sdk/native/native_ads.html",
+      "/",
+      "/en/max/android/overview/integration",
+      "/pagead/gen_204",
+      "ssrv.adjust.io",
+      "/me/community/",
+      "/hc/en-us/articles/236114328-how-can-i-expose-verbose-logging-for-the-sdk",
+      "/adnw_logging/",
+      "/sax/features/external-parameter-entities",
+      "/pagead/conversion/app/deeplink",
+      "/obj/ad-pattern-sg/static/images/",
+      "/mads/static/mad/sdk/native/sdk-core-v40-loader.html",
+      "pubads.g.doubleclick.net",
+      "/pagead/ping",
+      "/sdk/metrics",
+      "app.adjust.io",
+      "/drm/2007/03/protocols/acquirelicense",
+      "/mads/static/sdk/native/sdk-core-v40.html",
+      "/emsg/id3",
+      "app.adjust.com",
+      "/issue/kt-55980",
+      "/4.0/pix",
+      "/en/max/android/ad-formats/banner-and-mrec-ads",
+      "/mads/static/mad/sdk/native/production/sdk-core-v40-impl.html",
+      "/en/max/getting-started",
+      ".facebook.com",
+      "twitter.com",
+      "/docs/app-events/getting-started-app-events-android",
+      "/sdk/error_logs",
+      "/ads/qr/gen",
+      "/thumbnail_tile",
+      "/dev/packagevisibility.",
+      "gdpr.",
+      "/en/max/unity/overview/terms-and-privacy-policy-flow",
+      "/obj/ad-pattern-tx/",
+      "graph-video.",
+      "/mads/asp",
+      "ennu5mo7xan0n.x.pipedream.net",
+      "/guidelines/last-segment-number",
+      "/ads",
+      "/en/max/android/overview/terms-and-privacy-policy-flow",
+      "gdpr.adjust.io",
+      "/guidelines/trickmode",
+      "/docs/sharing/android",
+      "/union/endcard/1695802627329057/",
+      "/adjust/android_sdk",
+      "prod-a.applovin.com",
+      "/me/media_asset/",
+      "/android/1.0",
+      "/docs/android/guide/offline-capabilities.html",
+      "/rtadebugging",
+      "app.",
+      "/a",
+      "ssrv.adjust.com",
+      "/privacy/",
+      "/sax/features/external-general-entities",
+      "/google/gson/blob/main/troubleshooting.md",
+      "/firebase/firebase-android-sdk",
+      "applovin.com",
+      "/streaming/emsg-id3",
+      "/v0201/fd71964ced204df586b63b9d8fa3198a",
+      "/en/max/android/overview/advanced-settings",
+      "/guidelines/thumbnail_tile",
+      "facebook.com",
+      "/s/d",
+      "/csi",
+      "/sax/properties/lexical-handler",
+      "/1.0/sdk/error",
+      "/me/friendfinder/",
+      "ssrv.",
+      "graph.",
+      "/docs/mobile-sdk-dg/android/about/android-initialize.html",
+      "subscription.adjust.com",
+      "googleads.g.doubleclick.net",
+      "/licenses/license-2.0",
+      "/gtag/js",
+      "yandex.ru",
+      "gdpr.adjust.com",
+      "subscription.adjust.io",
+      "/docs/android/getting-started",
+      "bubble-pop----shooter-puzzle-default-rtdb.firebaseio.com",
+      "/issue/kt-67202",
+      "applovin.com.",
+      "/dev/mobile-ads/doc/android/quick-start/android-ads-component.html",
+      "/device",
+      "/issues/cleartext-not-permitted",
+      "/docs/android/troubleshooting/",
+      "/docs/android/getting-started/",
+      "x",
+      "/admob/sdkloader/native_video.html"
+    ]
+  },
+  "business_impacts": [
+    "Infrastructure Compromise (Data Exfiltration / Ransomware Pivot)",
+    "Financial Fraud & PCI-DSS Compliance Failure",
+    "PII Leakage & GDPR / KVKK Non-Compliance",
+    "Account Takeover (ATO) & Identity Theft",
+    "Android Platform Misconfiguration (Data Leakage via ADB/IPC)"
+  ]
+}

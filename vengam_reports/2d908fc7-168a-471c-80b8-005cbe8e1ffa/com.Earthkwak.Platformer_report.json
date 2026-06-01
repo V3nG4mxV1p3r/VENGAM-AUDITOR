@@ -1,0 +1,242 @@
+{
+  "schema_version": "vengam-v7",
+  "tool": "VENGAM Auditor",
+  "tool_version": "7.0.0",
+  "platform": "android",
+  "apk_name": "com.Earthkwak.Platformer.apk",
+  "apk_sha256": "48334935cf0aa3c8016339cb9fc9e36bc252f80acc53ff627be842c6a956cf28",
+  "scan_timestamp": "2026-05-11T15:25:18.044238Z",
+  "risk_score": 75,
+  "verdict": "BLOCK RELEASE",
+  "engine_stats": {
+    "files_scanned": 28319,
+    "lines_scanned": 6845004,
+    "fp_suppressed": 29185,
+    "patterns_run": 37,
+    "scan_duration_sec": 271.16
+  },
+  "findings": [
+    {
+      "title": "Exposed High-Entropy Unknown Asset",
+      "severity": "CRITICAL",
+      "confidence": "HIGH",
+      "exploitability": "LIKELY",
+      "secret_type": "High-Entropy Unknown Asset",
+      "description": "High Shannon entropy string detected near security-sensitive keyword.",
+      "simulation": "Attacker probes backend routes using the extracted string as bearer or seed material.",
+      "score_value": 25,
+      "cvss_vector": "",
+      "cwe_id": "CWE-798",
+      "owasp_ref": "M9: Insecure Data Storage",
+      "category": "General",
+      "triage_note": "Verify this is not a Base64 alphabet, resource ID, or SDK constant.",
+      "locations": [
+        {
+          "file": "smali\\com\\mbridge\\msdk\\config\\component\\wei\\monitor\\a.smali",
+          "line": 33,
+          "snippet": "const-string v0, \"javascript:\\'use strict\\';var _typeof=typeof Symbol===\\\"function\\\"&&typeof Symbol.iterator===\\\"symbol\\",
+          "redacted_match": ",mes********************************************************************************************************************************************************************er(\\"
+        },
+        {
+          "file": "smali\\com\\mbridge\\msdk\\config\\component\\wei\\monitor\\a.smali",
+          "line": 33,
+          "snippet": "const-string v0, \"javascript:\\'use strict\\';var _typeof=typeof Symbol===\\\"function\\\"&&typeof Symbol.iterator===\\\"symbol\\",
+          "redacted_match": ",ini****************************************************************************************************************************)();"
+        }
+      ]
+    },
+    {
+      "title": "Debug / God Mode Flag",
+      "severity": "HIGH",
+      "confidence": "MEDIUM",
+      "exploitability": "LIKELY",
+      "secret_type": "Debug Flag",
+      "description": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime.",
+      "simulation": "Attacker locates the memory address and toggles the flag for unfair advantage.",
+      "score_value": 20,
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+      "cwe_id": "CWE-489",
+      "owasp_ref": "M10: Extraneous Functionality",
+      "category": "AntiCheat",
+      "triage_note": "Verify file is game-specific (not a third-party debug library). Remove before release.",
+      "locations": [
+        {
+          "file": "smali\\androidx\\constraintlayout\\motion\\widget\\MotionLayout.smali",
+          "line": 2214,
+          "snippet": ".method public setDebugMode(I)V",
+          "redacted_match": "***REDACTED***"
+        },
+        {
+          "file": "smali\\androidx\\constraintlayout\\motion\\widget\\MotionLayout.smali",
+          "line": 2221,
+          "snippet": "\"debugMode\"",
+          "redacted_match": "***REDACTED***"
+        },
+        {
+          "file": "smali\\com\\apm\\insight\\runtime\\ConfigManager.smali",
+          "line": 47,
+          "snippet": ".field private mIsDebugMode:Z",
+          "redacted_match": "***REDACTED***"
+        },
+        {
+          "file": "smali\\com\\apm\\insight\\runtime\\ConfigManager.smali",
+          "line": 415,
+          "snippet": ".method public isDebugMode()Z",
+          "redacted_match": "***REDACTED***"
+        },
+        {
+          "file": "smali\\com\\apm\\insight\\runtime\\ConfigManager.smali",
+          "line": 525,
+          "snippet": ".method public setDebugMode(Z)V",
+          "redacted_match": "***REDACTED***"
+        }
+      ]
+    },
+    {
+      "title": "Unclassified High-Entropy Asset",
+      "severity": "MEDIUM",
+      "confidence": "LOW",
+      "exploitability": "THEORETICAL",
+      "secret_type": "Obfuscated Data",
+      "description": "High Shannon entropy string detected near security-sensitive keyword.",
+      "simulation": "Attacker reverse-engineers data to determine if it acts as seed or endpoint.",
+      "score_value": 5,
+      "cvss_vector": "",
+      "cwe_id": "CWE-798",
+      "owasp_ref": "M9: Insecure Data Storage",
+      "category": "General",
+      "triage_note": "Verify this is not a Base64 alphabet, resource ID, or SDK constant.",
+      "locations": [
+        {
+          "file": "smali_classes2\\com\\google\\android\\gms\\internal\\ads\\zzban.smali",
+          "line": 226,
+          "snippet": "const-string v1, \"dDkHRfh96kWRNKlCuQv4bcbQkP8hTl8+IryaCt9cMd/svBIVo0Uo/vCqMYwPlijS\"",
+          "redacted_match": "dDkH********************************************************lijS"
+        },
+        {
+          "file": "smali_classes2\\com\\google\\android\\gms\\internal\\ads\\zzban.smali",
+          "line": 275,
+          "snippet": "const-string v1, \"iCmAdyXMN2wNdoDGZPKplFblNf0e3f9Gr4uP4gCRDt/ctzDAq8UfSYwC5u9g4DzW\"",
+          "redacted_match": "iCmA********************************************************4DzW"
+        },
+        {
+          "file": "smali_classes2\\com\\google\\android\\gms\\internal\\ads\\zzban.smali",
+          "line": 285,
+          "snippet": "const-string v1, \"00Zqkn2vthPYFLR6iH1rsdxNkw6KyQ/MlAMxaONveqkDgXIjpGg039P2HSigYq2Q\"",
+          "redacted_match": "00Zq********************************************************Yq2Q"
+        },
+        {
+          "file": "smali_classes2\\com\\google\\android\\gms\\internal\\ads\\zzban.smali",
+          "line": 298,
+          "snippet": "const-string v1, \"XXF2CX++qjQzFfJDmqd+84h356GlStFLqQSTRbbce/csPkd7M5mpQw1l7igXWffL\"",
+          "redacted_match": "XXF2********************************************************WffL"
+        },
+        {
+          "file": "smali_classes2\\com\\google\\android\\gms\\internal\\ads\\zzban.smali",
+          "line": 382,
+          "snippet": "const-string v1, \"6fpJXJ/0mHk1BKHieJD271QStaRup/Ve1zgTWQI+7BRFgC5McwJ3e2UlmdWs2x64\"",
+          "redacted_match": "6fpJ********************************************************2x64"
+        }
+      ]
+    },
+    {
+      "title": "Insecure Random Number Generator",
+      "severity": "LOW",
+      "confidence": "MEDIUM",
+      "exploitability": "THEORETICAL",
+      "secret_type": "Weak Cryptography",
+      "description": "java.util.Random or Math.random() used in a security context — not cryptographically secure.",
+      "simulation": "Attacker predicts token generation sequence or game seed.",
+      "score_value": 5,
+      "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+      "cwe_id": "CWE-330",
+      "owasp_ref": "M5: Insufficient Cryptography",
+      "category": "General",
+      "triage_note": "Use SecureRandom for any security-relevant randomness.",
+      "locations": [
+        {
+          "file": "smali\\com\\bytedance\\sdk\\openadsdk\\core\\orl\\sk.smali",
+          "line": 34,
+          "snippet": "const-string v0, \";(function(omidGlobal) {\\n  var m;function aa(a){var b=0;return function(){return b<a.length?{done:!1,",
+          "redacted_match": "Math*****om()"
+        },
+        {
+          "file": "smali\\com\\mbridge\\msdk\\config\\component\\wei\\monitor\\a.smali",
+          "line": 33,
+          "snippet": "const-string v0, \"javascript:\\'use strict\\';var _typeof=typeof Symbol===\\\"function\\\"&&typeof Symbol.iterator===\\\"symbol\\",
+          "redacted_match": "Math*****om()"
+        },
+        {
+          "file": "smali_classes3\\com\\mbridge\\msdk\\setting\\util\\b.smali",
+          "line": 280,
+          "snippet": "const-string v0, \"// eslint-disable-next-line\\n;(function(root) {\\n  // Detect free variables `exports`.\\n  var freeExpo",
+          "redacted_match": "Math*****om()"
+        }
+      ]
+    }
+  ],
+  "dynamic_findings": [],
+  "attack_surface": {
+    "auth": [
+      "/auth/games",
+      "/auth/drive.appdata",
+      "/auth/games_lite"
+    ],
+    "payment": [],
+    "user_data": [
+      "/o/account"
+    ],
+    "internal_api": [
+      "/service/2/app_log/",
+      "/api/ad/union/sdk/get_ads/",
+      "/v1/stats/sdk",
+      "/v1",
+      "/v1/capture-scar-signals",
+      "/html/webappapis.html"
+    ],
+    "other": [
+      "/obj/ad-pattern-tx/",
+      "/atk/1020396",
+      "/google/gson/blob/main/troubleshooting.md",
+      "/en/max/android/ad-formats/banner-and-mrec-ads",
+      "/en/max/android/overview/advanced-settings",
+      "/mads/static/sdk/native/sdk-core-v40.html",
+      "prod-a.applovin.com",
+      "/drm/2007/03/protocols/acquirelicense",
+      "applovin.com",
+      "/csi",
+      "/html/common-microsyntaxes.html",
+      "pubads.g.doubleclick.net",
+      "/adnw_logging/",
+      "/gtag/js",
+      "/issue/kt-55980",
+      "/mads/static/mad/sdk/native/native_ads.html",
+      "/privacy/",
+      "/hc/en-us/articles/236114328-how-can-i-expose-verbose-logging-for-the-sdk",
+      "googleads.g.doubleclick.net",
+      "/mads/static/mad/sdk/native/sdk-core-v40-loader.html",
+      "/en/max/android/overview/terms-and-privacy-policy-flow",
+      "/4.0/pix",
+      "/mads/static/mad/sdk/native/production/sdk-core-v40-impl.html",
+      "/pagead/gen_204",
+      "/pagead/ping",
+      "/mads/asp",
+      "/admob/sdkloader/native_video.html",
+      "/en/max/unity/overview/terms-and-privacy-policy-flow",
+      "/en/max/getting-started",
+      "/obj/ad-pattern-tx/renderer/package_tx.json",
+      "/obj/ad-pattern-sg/static/images/",
+      "/dev/packagevisibility.",
+      "/android/1.0",
+      "/1.0/sdk/error",
+      "applovin.com.",
+      "/",
+      "/en/max/android/overview/integration",
+      "/c"
+    ]
+  },
+  "business_impacts": [
+    "PII Leakage & GDPR / KVKK Non-Compliance",
+    "Account Takeover (ATO) & Identity Theft"
+  ]
+}

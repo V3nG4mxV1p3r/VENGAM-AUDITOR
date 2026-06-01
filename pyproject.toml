@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "vengam-gamesec"
+version = "7.0.0"
+description = "VENGAM GameSec Auditor — Mobile Game Security Analysis Engine"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "VENGAM" }]
+keywords = ["security", "mobile", "android", "ios", "pentest", "game"]
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Security",
+    "Environment :: Console",
+]
+
+dependencies = [
+    "rich>=13.0",
+    "click>=8.1",
+]
+
+[project.optional-dependencies]
+web    = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "python-multipart>=0.0.9"]
+pdf    = ["weasyprint>=61"]
+frida  = ["frida>=16", "frida-tools>=12"]
+dev    = ["pytest>=8", "pytest-cov", "ruff", "mypy"]
+all    = ["vengam-gamesec[web,pdf,frida,dev]"]
+
+[project.scripts]
+vengam = "vengam.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["vengam*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-v --tb=short"

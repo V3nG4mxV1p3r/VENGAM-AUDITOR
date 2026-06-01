@@ -1,0 +1,322 @@
+════════════════════════════════════════════════════════════════════════
+  VENGAM Auditor  ·  Enterprise Security Report  ·  v7.0.0
+════════════════════════════════════════════════════════════════════════
+
+1. SCAN METADATA
+────────────────────────────────────────────────────────────────────────
+  Target           : com.katanlabs.bubblepop.apk
+  Platform         : ANDROID
+  SHA-256          : faca1c8d5bd216072a9658bfe002b94b18d59d395a11ed39f2b4d1f77662a13c
+  Scan Timestamp   : 2026-05-12T17:06:21.435284Z
+  Engine Version   : 7.0.0
+  Files Scanned    : 52494
+  Lines Scanned    : 12,915,679
+  Patterns Run     : 37
+  FP Suppressed    : 55788
+  Scan Duration    : 485.44s
+
+2. EXECUTIVE SUMMARY
+────────────────────────────────────────────────────────────────────────
+  Overall Risk Score   : 100 / 100
+  Release Readiness    : BLOCK RELEASE
+  Critical / High / Medium : 1 / 1 / 2
+  By Category      : General: 3 | AntiCheat: 1 | Config: 1
+  Attack Surface   : 120 actionable routes
+  Dynamic Findings : 0
+
+  KEY BUSINESS RISKS:
+    •  Infrastructure Compromise (Data Exfiltration / Ransomware Pivot)
+    •  Financial Fraud & PCI-DSS Compliance Failure
+    •  PII Leakage & GDPR / KVKK Non-Compliance
+    •  Account Takeover (ATO) & Identity Theft
+    •  Android Platform Misconfiguration (Data Leakage via ADB/IPC)
+
+3. STATIC FINDINGS  (sorted by severity)
+────────────────────────────────────────────────────────────────────────
+
+  [01] 🔴 CRITICAL  [General]  —  Google / Firebase API Key
+        Type           : Cloud API Key
+        Confidence     : HIGH
+        Exploitability : CONFIRMED
+        CVSS Vector    : CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N
+        CWE            : CWE-798
+        OWASP Mobile   : M9: Insecure Data Storage
+        Score Impact   : +30 pts
+
+        DESCRIPTION
+        A Google/Firebase API key embedded in the binary may grant access to
+         Firebase RTDB, Cloud Storage, or GCP services based on IAM permissi
+        ons.
+
+        ATTACK SIMULATION
+        Attacker calls Firebase REST API to attempt unauthenticated read/wri
+        te on the database.
+
+        TRIAGE GUIDANCE
+        ▶ Verify Firebase security rules — key alone may not grant write acces
+        ▶ s if rules require auth.
+
+        LOCATIONS  (3 shown, max 5)
+          → assets\google-services-desktop.json  :  line 32
+            "current_key": "AIzaSyAFmASCxN9-Sk2HV3lSMsTVGLQNQvKIjfM"
+            Matched: AIza*******************************IjfM
+          → res\values\strings.xml  :  line 135
+            <string name="google_api_key">AIzaSyAFmASCxN9-Sk2HV3lSMsTVGLQNQvKIjfM</string>
+            Matched: AIza*******************************IjfM
+          → res\values\strings.xml  :  line 137
+            <string name="google_crash_reporting_api_key">AIzaSyAFmASCxN9-Sk2HV3lSMsTVGLQNQvKIjfM</str
+            Matched: AIza*******************************IjfM
+
+  ······································································
+
+  [02] 🟠 HIGH  [AntiCheat]  —  Debug / God Mode Flag
+        Type           : Debug Flag
+        Confidence     : MEDIUM
+        Exploitability : LIKELY
+        CVSS Vector    : CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N
+        CWE            : CWE-489
+        OWASP Mobile   : M10: Extraneous Functionality
+        Score Impact   : +20 pts
+
+        DESCRIPTION
+        Debug gameplay flags (god mode, infinite resources) found. May be ac
+        tivatable at runtime.
+
+        ATTACK SIMULATION
+        Attacker locates the memory address and toggles the flag for unfair 
+        advantage.
+
+        TRIAGE GUIDANCE
+        ▶ Verify file is game-specific (not a third-party debug library). Remo
+        ▶ ve before release.
+
+        LOCATIONS  (5 shown, max 5)
+          → smali\androidx\constraintlayout\motion\widget\DesignTool.smali  :  line 2438
+            "debugMode"
+            Matched: ***REDACTED***
+          → smali\androidx\constraintlayout\motion\widget\MotionController.smali  :  line 5252
+            "debugMode"
+            Matched: ***REDACTED***
+          → smali\androidx\constraintlayout\motion\widget\MotionLayout.smali  :  line 5800
+            .method public getDebugMode(Z)V
+            Matched: ***REDACTED***
+          → smali\androidx\constraintlayout\motion\widget\MotionLayout.smali  :  line 8666
+            .method public setDebugMode(I)V
+            Matched: ***REDACTED***
+          → smali\androidx\constraintlayout\motion\widget\MotionLayout.smali  :  line 8673
+            "debugMode"
+            Matched: ***REDACTED***
+
+  ······································································
+
+  [03] 🟡 MEDIUM  [Config]  —  Exported Component Without Permission
+        Type           : Android Manifest Misconfiguration
+        Confidence     : MEDIUM
+        Exploitability : LIKELY
+        CVSS Vector    : CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:M/I:M/A:N
+        CWE            : CWE-926
+        OWASP Mobile   : M1: Improper Platform Usage
+        Score Impact   : +10 pts
+
+        DESCRIPTION
+        Activity/Service/Provider exported without a permission guard. Other
+         apps can invoke it directly.
+
+        ATTACK SIMULATION
+        Attacker app invokes the exported component with crafted Intent to a
+        ccess game data.
+
+        TRIAGE GUIDANCE
+        ▶ Add android:permission or set android:exported=false for internal co
+        ▶ mponents.
+
+        LOCATIONS  (5 shown, max 5)
+          → AndroidManifest.xml  :  line 69
+            <provider android:authorities="com.facebook.app.FacebookContentProvider1051443353666622" a
+            Matched: andr***************rue"
+          → AndroidManifest.xml  :  line 93
+            <activity android:exported="true" android:name="com.facebook.unity.FBUnityAppLinkActivity"
+            Matched: andr***************rue"
+          → AndroidManifest.xml  :  line 94
+            <activity android:exported="true" android:name="com.facebook.unity.FBUnityDeepLinkingActiv
+            Matched: andr***************rue"
+          → AndroidManifest.xml  :  line 107
+            <activity android:exported="true" android:name="com.facebook.CustomTabActivity">
+            Matched: andr***************rue"
+          → AndroidManifest.xml  :  line 190
+            <provider android:authorities="com.katanlabs.bubblepop.appmetrica.preloadinfo.retail" andr
+            Matched: andr***************rue"
+
+  ······································································
+
+  [04] 🟡 MEDIUM  [General]  —  Unclassified High-Entropy Asset
+        Type           : Obfuscated Data
+        Confidence     : LOW
+        Exploitability : THEORETICAL
+        CWE            : CWE-798
+        OWASP Mobile   : M9: Insecure Data Storage
+        Score Impact   : +5 pts
+
+        DESCRIPTION
+        High Shannon entropy string detected near security-sensitive keyword
+        .
+
+        ATTACK SIMULATION
+        Attacker reverse-engineers data to determine if it acts as seed or e
+        ndpoint.
+
+        TRIAGE GUIDANCE
+        ▶ Verify this is not a Base64 alphabet, resource ID, or SDK constant.
+
+        LOCATIONS  (5 shown, max 5)
+          → smali_classes2\com\bytedance\sdk\openadsdk\component\reward\to.smali  :  line 16
+            const-string v2, "{\n\t\t\"ad_id\": \"1639941324071955\",\n\t\t\"app\": {\n\t\t\t\"app_nam
+            Matched: http*****************************************************************************************************************************************************%3D\
+          → smali_classes3\com\google\android\gms\internal\ads\zzawy.smali  :  line 456
+            const-string v1, "01PVhP+doaGKdC1W6GrY+2IWUVFKtg3RWpQDin/wN/cS8wkuezVXqSDwZNREySxt"
+            Matched: 01PV********************************************************ySxt
+          → smali_classes3\com\google\android\gms\internal\ads\zzawy.smali  :  line 548
+            const-string v1, "6Tbgi6IQESKZikJOpZcClcVJxza1rhAf3nfasZu/vDcTd3loITpTNbH23xjyLA5L"
+            Matched: 6Tbg********************************************************LA5L
+          → smali_classes3\com\google\android\gms\internal\ads\zzawy.smali  :  line 625
+            const-string v1, "ffEAQyBH71yR4B2obQT/Qgb3Fo0ajWwFYmmZt2nfIS2fjNh6ir76IWAmhSUkzxpD"
+            Matched: ffEA********************************************************zxpD
+          → smali_classes3\com\google\android\gms\internal\ads\zzawy.smali  :  line 682
+            const-string v1, "YJMz4lZ/SFOXN6kW19UKnvAqcLtndNv4f6er9d24/5MuXcrsMTIC+9Jfbhpe2HMW"
+            Matched: YJMz********************************************************2HMW
+
+  ······································································
+
+  [05] 🔵 LOW  [General]  —  Insecure Random Number Generator
+        Type           : Weak Cryptography
+        Confidence     : MEDIUM
+        Exploitability : THEORETICAL
+        CVSS Vector    : CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N
+        CWE            : CWE-330
+        OWASP Mobile   : M5: Insufficient Cryptography
+        Score Impact   : +5 pts
+
+        DESCRIPTION
+        java.util.Random or Math.random() used in a security context — not c
+        ryptographically secure.
+
+        ATTACK SIMULATION
+        Attacker predicts token generation sequence or game seed.
+
+        TRIAGE GUIDANCE
+        ▶ Use SecureRandom for any security-relevant randomness.
+
+        LOCATIONS  (2 shown, max 5)
+          → smali_classes2\com\bytedance\sdk\openadsdk\core\fs\mzz.smali  :  line 303
+            const-string v0, ";(function(omidGlobal) {\n  var m;function aa(a){var b=0;return function
+            Matched: Math*****om()
+          → smali_classes6\yads\qu3.smali  :  line 289
+            const-string v0, ";(function(omidGlobal) {\n  \'use strict\';var n;function aa(a){var b=0;
+            Matched: Math*****om()
+
+  ······································································
+
+5. ATTACK SURFACE MAPPING
+────────────────────────────────────────────────────────────────────────
+
+  [AUTH]  —  15 routes
+    + /auth/appstate
+    + /auth/datastoremobile
+    + /auth/drive
+    + /auth/drive.appdata
+    + /auth/drive.apps
+    + /auth/drive.file
+    + /auth/games
+    + /auth/games.firstparty
+    … and 7 more.
+
+  [PAYMENT]  —  1 routes
+    + www.paypal.com
+
+  [USER DATA]  —  2 routes
+    + /issues/player-accessed-on-wrong-thread
+    + /o/account
+
+  [INTERNAL API]  —  6 routes
+    + /api/ad/union/sdk/get_ads/
+    + /api/ads
+    + /api/v1/app_sdk/config
+    + /recaptcha/api3
+    + /service/2/app_log/
+    + /v1/stats/sdk
+
+  [OTHER]  —  96 routes
+    + .facebook.com
+    + /
+    + /1.0/sdk/error
+    + /4.0/pix
+    + /a
+    + /adjust/android_sdk
+    + /admob/sdkloader/native_video.html
+    + /adnw_logging/
+    … and 88 more.
+
+6. RISK SCORE BREAKDOWN
+────────────────────────────────────────────────────────────────────────
+  Base: 0
+  (+30)  [CRITICAL]  Google / Firebase API Key
+  (+20)  [HIGH    ]  Debug / God Mode Flag
+  (+10)  [MEDIUM  ]  Exported Component Without Permission
+  (+05)  [MEDIUM  ]  Unclassified High-Entropy Asset
+  (+05)  [LOW     ]  Insecure Random Number Generator
+  (+15)  [SURFACE ]  Payment routes exposed
+  (+10)  [SURFACE ]  Auth routes exposed
+  (+10)  [SURFACE ]  Broad API exposure (>5 routes)
+  [Combo bonuses applied for correlated findings]
+────────────────────────────────────────────────────────────────────────
+  TOTAL  :  100 / 100
+
+7. REMEDIATION RECOMMENDATIONS
+────────────────────────────────────────────────────────────────────────
+
+  1. SECRETS MANAGEMENT
+     Remove ALL hardcoded credentials. Use Android Keystore for crypto. F
+     etch secrets post-auth from a dedicated secrets manager (Vault, AWS 
+     SM).
+
+  2. TOKEN ARCHITECTURE
+     OAuth 2.0 / OIDC with short-lived JWTs (≤15 min). Enforce RS256/ES25
+     6 server-side.
+
+  3. API DEFENCE
+     Rate-limit at WAF/gateway. Enforce Play Integrity API. Use mTLS for 
+     service-to-service.
+
+  4. GAME ECONOMY
+     ALL economy operations validated server-side. Signed score/purchase 
+     submissions. Server-authoritative currency ledger.
+
+  5. ANTI-CHEAT HARDENING
+     Remove debug flags before release. Enforce App Attestation. Consider
+      LLVM-obfuscator for critical game logic.
+
+  6. ASSET PROTECTION
+     Unreal PAK encryption keys must NEVER be in the client binary.
+
+  7. CODE OBFUSCATION
+     Aggressive R8/ProGuard. Commercial protectors (DexGuard, iXGuard) fo
+     r crypto/anti-cheat classes.
+
+  8. CI/CD INTEGRATION
+     Integrate VENGAM as a blocking pipeline gate. Exit code 2 (BLOCK REL
+     EASE) must fail the pipeline.
+
+  9. NETWORK SECURITY
+     Disable cleartext traffic. Enable certificate pinning. Do not trust 
+     user CA stores in production.
+
+  10. MANIFEST HARDENING
+     Set allowBackup=false. Add permissions to all exported components.
+
+════════════════════════════════════════════════════════════════════════
+  FINAL VERDICT  :  BLOCK RELEASE
+  RISK SCORE     :  100 / 100
+════════════════════════════════════════════════════════════════════════
+  REASON : Critical credentials and high-value attack chains confirmed.
+  ACTION : HALT deployment. Rotate ALL exposed credentials. Remediate before re-submission.
+════════════════════════════════════════════════════════════════════════

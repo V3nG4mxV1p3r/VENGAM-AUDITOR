@@ -1,0 +1,264 @@
+════════════════════════════════════════════════════════════════════════
+  VENGAM Auditor  ·  Enterprise Security Report  ·  v7.0.0
+════════════════════════════════════════════════════════════════════════
+
+1. SCAN METADATA
+────────────────────────────────────────────────────────────────────────
+  Target           : com.Earthkwak.Platformer.apk
+  Platform         : ANDROID
+  SHA-256          : 48334935cf0aa3c8016339cb9fc9e36bc252f80acc53ff627be842c6a956cf28
+  Scan Timestamp   : 2026-05-11T15:25:18.044238Z
+  Engine Version   : 7.0.0
+  Files Scanned    : 28319
+  Lines Scanned    : 6,845,004
+  Patterns Run     : 37
+  FP Suppressed    : 29185
+  Scan Duration    : 271.16s
+
+2. EXECUTIVE SUMMARY
+────────────────────────────────────────────────────────────────────────
+  Overall Risk Score   : 75 / 100
+  Release Readiness    : BLOCK RELEASE
+  Critical / High / Medium : 1 / 1 / 1
+  By Category      : General: 3 | AntiCheat: 1
+  Attack Surface   : 48 actionable routes
+  Dynamic Findings : 0
+
+  KEY BUSINESS RISKS:
+    •  PII Leakage & GDPR / KVKK Non-Compliance
+    •  Account Takeover (ATO) & Identity Theft
+
+3. STATIC FINDINGS  (sorted by severity)
+────────────────────────────────────────────────────────────────────────
+
+  [01] 🔴 CRITICAL  [General]  —  Exposed High-Entropy Unknown Asset
+        Type           : High-Entropy Unknown Asset
+        Confidence     : HIGH
+        Exploitability : LIKELY
+        CWE            : CWE-798
+        OWASP Mobile   : M9: Insecure Data Storage
+        Score Impact   : +25 pts
+
+        DESCRIPTION
+        High Shannon entropy string detected near security-sensitive keyword
+        .
+
+        ATTACK SIMULATION
+        Attacker probes backend routes using the extracted string as bearer 
+        or seed material.
+
+        TRIAGE GUIDANCE
+        ▶ Verify this is not a Base64 alphabet, resource ID, or SDK constant.
+
+        LOCATIONS  (2 shown, max 5)
+          → smali\com\mbridge\msdk\config\component\wei\monitor\a.smali  :  line 33
+            const-string v0, "javascript:\'use strict\';var _typeof=typeof Symbol===\"function\"&&type
+            Matched: ,mes********************************************************************************************************************************************************************er(\
+          → smali\com\mbridge\msdk\config\component\wei\monitor\a.smali  :  line 33
+            const-string v0, "javascript:\'use strict\';var _typeof=typeof Symbol===\"function\"&&type
+            Matched: ,ini****************************************************************************************************************************)();
+
+  ······································································
+
+  [02] 🟠 HIGH  [AntiCheat]  —  Debug / God Mode Flag
+        Type           : Debug Flag
+        Confidence     : MEDIUM
+        Exploitability : LIKELY
+        CVSS Vector    : CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N
+        CWE            : CWE-489
+        OWASP Mobile   : M10: Extraneous Functionality
+        Score Impact   : +20 pts
+
+        DESCRIPTION
+        Debug gameplay flags (god mode, infinite resources) found. May be ac
+        tivatable at runtime.
+
+        ATTACK SIMULATION
+        Attacker locates the memory address and toggles the flag for unfair 
+        advantage.
+
+        TRIAGE GUIDANCE
+        ▶ Verify file is game-specific (not a third-party debug library). Remo
+        ▶ ve before release.
+
+        LOCATIONS  (5 shown, max 5)
+          → smali\androidx\constraintlayout\motion\widget\MotionLayout.smali  :  line 2214
+            .method public setDebugMode(I)V
+            Matched: ***REDACTED***
+          → smali\androidx\constraintlayout\motion\widget\MotionLayout.smali  :  line 2221
+            "debugMode"
+            Matched: ***REDACTED***
+          → smali\com\apm\insight\runtime\ConfigManager.smali  :  line 47
+            .field private mIsDebugMode:Z
+            Matched: ***REDACTED***
+          → smali\com\apm\insight\runtime\ConfigManager.smali  :  line 415
+            .method public isDebugMode()Z
+            Matched: ***REDACTED***
+          → smali\com\apm\insight\runtime\ConfigManager.smali  :  line 525
+            .method public setDebugMode(Z)V
+            Matched: ***REDACTED***
+
+  ······································································
+
+  [03] 🟡 MEDIUM  [General]  —  Unclassified High-Entropy Asset
+        Type           : Obfuscated Data
+        Confidence     : LOW
+        Exploitability : THEORETICAL
+        CWE            : CWE-798
+        OWASP Mobile   : M9: Insecure Data Storage
+        Score Impact   : +5 pts
+
+        DESCRIPTION
+        High Shannon entropy string detected near security-sensitive keyword
+        .
+
+        ATTACK SIMULATION
+        Attacker reverse-engineers data to determine if it acts as seed or e
+        ndpoint.
+
+        TRIAGE GUIDANCE
+        ▶ Verify this is not a Base64 alphabet, resource ID, or SDK constant.
+
+        LOCATIONS  (5 shown, max 5)
+          → smali_classes2\com\google\android\gms\internal\ads\zzban.smali  :  line 226
+            const-string v1, "dDkHRfh96kWRNKlCuQv4bcbQkP8hTl8+IryaCt9cMd/svBIVo0Uo/vCqMYwPlijS"
+            Matched: dDkH********************************************************lijS
+          → smali_classes2\com\google\android\gms\internal\ads\zzban.smali  :  line 275
+            const-string v1, "iCmAdyXMN2wNdoDGZPKplFblNf0e3f9Gr4uP4gCRDt/ctzDAq8UfSYwC5u9g4DzW"
+            Matched: iCmA********************************************************4DzW
+          → smali_classes2\com\google\android\gms\internal\ads\zzban.smali  :  line 285
+            const-string v1, "00Zqkn2vthPYFLR6iH1rsdxNkw6KyQ/MlAMxaONveqkDgXIjpGg039P2HSigYq2Q"
+            Matched: 00Zq********************************************************Yq2Q
+          → smali_classes2\com\google\android\gms\internal\ads\zzban.smali  :  line 298
+            const-string v1, "XXF2CX++qjQzFfJDmqd+84h356GlStFLqQSTRbbce/csPkd7M5mpQw1l7igXWffL"
+            Matched: XXF2********************************************************WffL
+          → smali_classes2\com\google\android\gms\internal\ads\zzban.smali  :  line 382
+            const-string v1, "6fpJXJ/0mHk1BKHieJD271QStaRup/Ve1zgTWQI+7BRFgC5McwJ3e2UlmdWs2x64"
+            Matched: 6fpJ********************************************************2x64
+
+  ······································································
+
+  [04] 🔵 LOW  [General]  —  Insecure Random Number Generator
+        Type           : Weak Cryptography
+        Confidence     : MEDIUM
+        Exploitability : THEORETICAL
+        CVSS Vector    : CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N
+        CWE            : CWE-330
+        OWASP Mobile   : M5: Insufficient Cryptography
+        Score Impact   : +5 pts
+
+        DESCRIPTION
+        java.util.Random or Math.random() used in a security context — not c
+        ryptographically secure.
+
+        ATTACK SIMULATION
+        Attacker predicts token generation sequence or game seed.
+
+        TRIAGE GUIDANCE
+        ▶ Use SecureRandom for any security-relevant randomness.
+
+        LOCATIONS  (3 shown, max 5)
+          → smali\com\bytedance\sdk\openadsdk\core\orl\sk.smali  :  line 34
+            const-string v0, ";(function(omidGlobal) {\n  var m;function aa(a){var b=0;return function
+            Matched: Math*****om()
+          → smali\com\mbridge\msdk\config\component\wei\monitor\a.smali  :  line 33
+            const-string v0, "javascript:\'use strict\';var _typeof=typeof Symbol===\"function\"&&type
+            Matched: Math*****om()
+          → smali_classes3\com\mbridge\msdk\setting\util\b.smali  :  line 280
+            const-string v0, "// eslint-disable-next-line\n;(function(root) {\n  // Detect free variab
+            Matched: Math*****om()
+
+  ······································································
+
+5. ATTACK SURFACE MAPPING
+────────────────────────────────────────────────────────────────────────
+
+  [AUTH]  —  3 routes
+    + /auth/drive.appdata
+    + /auth/games
+    + /auth/games_lite
+
+  [USER DATA]  —  1 routes
+    + /o/account
+
+  [INTERNAL API]  —  6 routes
+    + /api/ad/union/sdk/get_ads/
+    + /html/webappapis.html
+    + /service/2/app_log/
+    + /v1
+    + /v1/capture-scar-signals
+    + /v1/stats/sdk
+
+  [OTHER]  —  38 routes
+    + /
+    + /1.0/sdk/error
+    + /4.0/pix
+    + /admob/sdkloader/native_video.html
+    + /adnw_logging/
+    + /android/1.0
+    + /atk/1020396
+    + /c
+    … and 30 more.
+
+6. RISK SCORE BREAKDOWN
+────────────────────────────────────────────────────────────────────────
+  Base: 0
+  (+25)  [CRITICAL]  Exposed High-Entropy Unknown Asset
+  (+20)  [HIGH    ]  Debug / God Mode Flag
+  (+05)  [MEDIUM  ]  Unclassified High-Entropy Asset
+  (+05)  [LOW     ]  Insecure Random Number Generator
+  (+10)  [SURFACE ]  Auth routes exposed
+  (+10)  [SURFACE ]  Broad API exposure (>5 routes)
+  [Combo bonuses applied for correlated findings]
+────────────────────────────────────────────────────────────────────────
+  TOTAL  :  75 / 100
+
+7. REMEDIATION RECOMMENDATIONS
+────────────────────────────────────────────────────────────────────────
+
+  1. SECRETS MANAGEMENT
+     Remove ALL hardcoded credentials. Use Android Keystore for crypto. F
+     etch secrets post-auth from a dedicated secrets manager (Vault, AWS 
+     SM).
+
+  2. TOKEN ARCHITECTURE
+     OAuth 2.0 / OIDC with short-lived JWTs (≤15 min). Enforce RS256/ES25
+     6 server-side.
+
+  3. API DEFENCE
+     Rate-limit at WAF/gateway. Enforce Play Integrity API. Use mTLS for 
+     service-to-service.
+
+  4. GAME ECONOMY
+     ALL economy operations validated server-side. Signed score/purchase 
+     submissions. Server-authoritative currency ledger.
+
+  5. ANTI-CHEAT HARDENING
+     Remove debug flags before release. Enforce App Attestation. Consider
+      LLVM-obfuscator for critical game logic.
+
+  6. ASSET PROTECTION
+     Unreal PAK encryption keys must NEVER be in the client binary.
+
+  7. CODE OBFUSCATION
+     Aggressive R8/ProGuard. Commercial protectors (DexGuard, iXGuard) fo
+     r crypto/anti-cheat classes.
+
+  8. CI/CD INTEGRATION
+     Integrate VENGAM as a blocking pipeline gate. Exit code 2 (BLOCK REL
+     EASE) must fail the pipeline.
+
+  9. NETWORK SECURITY
+     Disable cleartext traffic. Enable certificate pinning. Do not trust 
+     user CA stores in production.
+
+  10. MANIFEST HARDENING
+     Set allowBackup=false. Add permissions to all exported components.
+
+════════════════════════════════════════════════════════════════════════
+  FINAL VERDICT  :  BLOCK RELEASE
+  RISK SCORE     :  75 / 100
+════════════════════════════════════════════════════════════════════════
+  REASON : Critical credentials and high-value attack chains confirmed.
+  ACTION : HALT deployment. Rotate ALL exposed credentials. Remediate before re-submission.
+════════════════════════════════════════════════════════════════════════

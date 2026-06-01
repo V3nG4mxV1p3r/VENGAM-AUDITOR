@@ -1,0 +1,194 @@
+# ═══════════════════════════════════════════════════════
+# VENGAM Auditor — GitHub Action
+# Usage: vengam/gamesec-action@v7
+# ═══════════════════════════════════════════════════════
+
+name: 'VENGAM GameSec Auditor'
+description: 'Professional mobile game security analysis — Android APK & iOS IPA'
+author: 'VENGAM'
+
+branding:
+  icon:  'shield'
+  color: 'red'
+
+inputs:
+  apk_path:
+    description: 'Path to the APK or IPA file to scan'
+    required: true
+
+  platform:
+    description: 'Target platform: android or ios'
+    required: false
+    default: 'android'
+
+  severity_filter:
+    description: 'Comma-separated severity levels to report (e.g. CRITICAL,HIGH)'
+    required: false
+    default: ''
+
+  category_filter:
+    description: 'Comma-separated categories to report (e.g. Economy,AntiCheat)'
+    required: false
+    default: ''
+
+  fail_on:
+    description: 'Fail the workflow on this verdict: BLOCK_RELEASE | AT_RISK | NEVER'
+    required: false
+    default: 'BLOCK_RELEASE'
+
+  output_dir:
+    description: 'Directory to write reports into'
+    required: false
+    default: 'vengam-reports'
+
+  upload_sarif:
+    description: 'Upload SARIF to GitHub Code Scanning (true/false)'
+    required: false
+    default: 'true'
+
+outputs:
+  risk_score:
+    description: 'Numeric risk score (0-100)'
+  verdict:
+    description: 'Release verdict string'
+  findings_count:
+    description: 'Total number of findings'
+  report_txt:
+    description: 'Path to the text report'
+  report_json:
+    description: 'Path to the JSON report'
+  report_sarif:
+    description: 'Path to the SARIF report'
+
+runs:
+  using: 'composite'
+  steps:
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Set up Java (for apktool)
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Install apktool
+      shell: bash
+      run: |
+        mkdir -p $HOME/apktool
+        wget -q https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.9.3.jar \
+          -O $HOME/apktool/apktool.jar
+        echo "VENGAM_APKTOOL=$HOME/apktool/apktool.jar" >> $GITHUB_ENV
+
+    - name: Install VENGAM
+      shell: bash
+      run: |
+        pip install --quiet rich
+        pip install --quiet -e ${{ github.action_path }}/../../ 2>/dev/null || \
+        pip install --quiet vengam-gamesec 2>/dev/null || true
+
+    - name: Run VENGAM scan
+      shell: bash
+      id: vengam_scan
+      run: |
+        set +e
+
+        ARGS="-t ${{ inputs.apk_path }} -o ${{ inputs.output_dir }} --format all"
+
+        if [ "${{ inputs.platform }}" = "ios" ]; then
+          ARGS="--ios $ARGS"
+        fi
+
+        if [ -n "${{ inputs.severity_filter }}" ]; then
+          ARGS="$ARGS --severity-filter ${{ inputs.severity_filter }}"
+        fi
+
+        if [ -n "${{ inputs.category_filter }}" ]; then
+          ARGS="$ARGS --category-filter ${{ inputs.category_filter }}"
+        fi
+
+        python -m vengam.cli $ARGS
+        EXIT_CODE=$?
+
+        # Parse JSON report for outputs
+        STEM=$(basename "${{ inputs.apk_path }}" | sed 's/\.[^.]*$//')
+        JSON_PATH="${{ inputs.output_dir }}/${STEM}_vengam_report.json"
+
+        if [ -f "$JSON_PATH" ]; then
+          SCORE=$(python3 -c "import json; d=json.load(open('$JSON_PATH')); print(d['risk_score'])" 2>/dev/null || echo "0")
+          VERDICT=$(python3 -c "import json; d=json.load(open('$JSON_PATH')); print(d['verdict'])" 2>/dev/null || echo "UNKNOWN")
+          COUNT=$(python3 -c "import json; d=json.load(open('$JSON_PATH')); print(len(d['findings']))" 2>/dev/null || echo "0")
+        else
+          SCORE="0"
+          VERDICT="UNKNOWN"
+          COUNT="0"
+        fi
+
+        echo "risk_score=$SCORE"      >> $GITHUB_OUTPUT
+        echo "verdict=$VERDICT"       >> $GITHUB_OUTPUT
+        echo "findings_count=$COUNT"  >> $GITHUB_OUTPUT
+        echo "report_txt=${{ inputs.output_dir }}/${STEM}_vengam_report.txt"   >> $GITHUB_OUTPUT
+        echo "report_json=${{ inputs.output_dir }}/${STEM}_vengam_report.json" >> $GITHUB_OUTPUT
+        echo "report_sarif=${{ inputs.output_dir }}/${STEM}_vengam_report.sarif" >> $GITHUB_OUTPUT
+        echo "exit_code=$EXIT_CODE"   >> $GITHUB_OUTPUT
+
+        exit 0  # Always succeed here; fail decision below
+
+    - name: Print scan summary
+      shell: bash
+      run: |
+        echo ""
+        echo "══════════════════════════════════════════"
+        echo "  VENGAM GameSec Auditor — Scan Complete"
+        echo "══════════════════════════════════════════"
+        echo "  Risk Score    : ${{ steps.vengam_scan.outputs.risk_score }} / 100"
+        echo "  Verdict       : ${{ steps.vengam_scan.outputs.verdict }}"
+        echo "  Findings      : ${{ steps.vengam_scan.outputs.findings_count }}"
+        echo "══════════════════════════════════════════"
+
+    - name: Upload SARIF to GitHub Code Scanning
+      if: inputs.upload_sarif == 'true' && always()
+      uses: github/codeql-action/upload-sarif@v3
+      continue-on-error: true
+      with:
+        sarif_file: ${{ steps.vengam_scan.outputs.report_sarif }}
+        category:   'vengam-gamesec'
+
+    - name: Upload reports as artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name:              vengam-reports
+        path:              ${{ inputs.output_dir }}/
+        retention-days:    30
+
+    - name: Enforce fail_on policy
+      shell: bash
+      run: |
+        VERDICT="${{ steps.vengam_scan.outputs.verdict }}"
+        FAIL_ON="${{ inputs.fail_on }}"
+        SCORE="${{ steps.vengam_scan.outputs.risk_score }}"
+
+        echo "Verdict: $VERDICT | Fail policy: $FAIL_ON | Score: $SCORE"
+
+        if [ "$FAIL_ON" = "NEVER" ]; then
+          echo "✅ fail_on=NEVER — pipeline continues regardless of verdict."
+          exit 0
+        fi
+
+        if [ "$FAIL_ON" = "BLOCK_RELEASE" ] && [ "$VERDICT" = "BLOCK RELEASE" ]; then
+          echo "🔴 BLOCK RELEASE verdict — failing pipeline."
+          exit 2
+        fi
+
+        if [ "$FAIL_ON" = "AT_RISK" ] && \
+           [ "$VERDICT" != "CONDITIONALLY SAFE" ]; then
+          echo "🟠 AT RISK or worse — failing pipeline."
+          exit 1
+        fi
+
+        echo "✅ Verdict within acceptable threshold."
+        exit 0

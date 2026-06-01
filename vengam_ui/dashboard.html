@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VENGAM Auditor</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   VENGAM AUDITOR — Web UI
+   Theme: Dark Green/Black
+   Fonts: Rajdhani (SIL-OFL) + Share Tech Mono (SIL-OFL)
+═══════════════════════════════════════════ */
+:root{
+  --bg0:#070a07;--bg1:#0c110c;--bg2:#101810;--bg3:#141e14;--bg4:#1a2a1a;
+  --green:#00e664;--green2:#00b84f;--green3:#007a34;--green4:#003d1a;
+  --green-glow:rgba(0,230,100,0.08);--green-glow2:rgba(0,230,100,0.15);
+  --gray:#7a9a7a;--gray2:#4a6a4a;--gray3:#2a3e2a;
+  --text:#d0ecd0;--text2:#8aaa8a;--text3:#4a6a4a;
+  --red:#e53935;--orange:#ff8c00;--yellow:#ffc107;--blue:#29b6f6;
+  --border:#1a2a1a;--border2:#203020;
+  --mono:'Share Tech Mono',monospace;
+  --display:'Rajdhani',sans-serif;
+  --radius:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg0);color:var(--text);font-family:var(--display);font-size:14px;display:flex;flex-direction:column}
+
+/* ── SCANLINES overlay ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+/* ══ HEADER ══════════════════════════════════════════════════════ */
+.header{
+  height:54px;min-height:54px;
+  background:var(--bg1);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 18px;gap:14px;
+  position:relative;
+}
+.header::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green3),transparent);
+}
+.logo-wrap{display:flex;align-items:center;gap:11px;text-decoration:none}
+.logo-svg{width:38px;height:38px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(0,230,100,0.25))}
+.logo-text{display:flex;flex-direction:column;line-height:1}
+.lt-main{font-family:var(--display);font-size:20px;font-weight:700;color:var(--green);letter-spacing:3px}
+.lt-sub{font-family:var(--mono);font-size:8px;color:var(--gray2);letter-spacing:5px;margin-top:2px}
+.ver-badge{font-family:var(--mono);font-size:8px;background:var(--bg4);color:var(--green3);padding:2px 7px;border-radius:3px;border:1px solid var(--border2)}
+
+.nav{display:flex;gap:2px;margin-left:auto}
+.nav-btn{
+  font-family:var(--mono);font-size:10px;letter-spacing:1px;
+  padding:6px 14px;border-radius:var(--radius);cursor:pointer;
+  color:var(--gray2);border:1px solid transparent;background:transparent;
+  transition:all .15s;
+}
+.nav-btn.active{color:var(--green);background:var(--green-glow2);border-color:var(--green3)}
+.nav-btn:hover:not(.active){color:var(--text2);background:var(--bg3)}
+
+.scan-btn{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:2px;
+  padding:7px 18px;border-radius:var(--radius);cursor:pointer;
+  color:#000;background:var(--green);border:none;
+  transition:all .15s;white-space:nowrap;
+  box-shadow:0 0 12px rgba(0,230,100,0.3);
+}
+.scan-btn:hover{background:#1aff7a;box-shadow:0 0 20px rgba(0,230,100,0.45)}
+
+/* ══ LAYOUT ══════════════════════════════════════════════════════ */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* ══ SIDEBAR ══════════════════════════════════════════════════════ */
+.sidebar{
+  width:210px;min-width:210px;
+  background:var(--bg1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:width .2s;
+}
+.sb-section{
+  font-family:var(--mono);font-size:8px;letter-spacing:3px;
+  color:var(--gray3);padding:14px 14px 5px;
+}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 14px;cursor:pointer;
+  font-family:var(--mono);font-size:10px;color:var(--gray2);
+  border-left:2px solid transparent;transition:all .15s;
+  white-space:nowrap;
+}
+.sb-item.active{color:var(--green);background:var(--green-glow);border-left-color:var(--green)}
+.sb-item:hover:not(.active){color:var(--text2);background:var(--bg3)}
+.sb-icon{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+.sb-badge{
+  margin-left:auto;font-family:var(--mono);font-size:8px;
+  background:var(--bg4);color:var(--gray2);
+  padding:1px 6px;border-radius:10px;
+}
+.sb-badge.crit{background:rgba(229,57,53,.18);color:var(--red)}
+.sb-badge.high{background:rgba(255,140,0,.15);color:var(--orange)}
+.sb-divider{height:1px;background:var(--border);margin:8px 14px}
+
+/* ══ MAIN ════════════════════════════════════════════════════════ */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;background:var(--bg0)}
+
+/* TOP BAR */
+.topbar{
+  background:var(--bg1);border-bottom:1px solid var(--border);
+  padding:10px 18px;display:flex;align-items:center;gap:12px;
+  min-height:52px;
+}
+.apk-info{flex:1;overflow:hidden}
+.apk-name{font-family:var(--display);font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apk-meta{font-family:var(--mono);font-size:9px;color:var(--gray2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.verdict-pill{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;
+  padding:5px 13px;border-radius:var(--radius);white-space:nowrap;flex-shrink:0;
+}
+.v-block{background:rgba(229,57,53,.12);color:var(--red);border:1px solid rgba(229,57,53,.3)}
+.v-risk{background:rgba(255,140,0,.10);color:var(--orange);border:1px solid rgba(255,140,0,.3)}
+.v-safe{background:var(--green-glow2);color:var(--green);border:1px solid var(--green3)}
+
+/* SCORE ROW */
+.score-row{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
+  padding:12px 18px;border-bottom:1px solid var(--border);
+  background:var(--bg1);
+}
+.score-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
+.score-val{font-family:var(--mono);font-size:22px;font-weight:700;line-height:1}
+.score-lbl{font-family:var(--mono);font-size:8px;color:var(--gray2);margin-top:5px;letter-spacing:1px}
+
+/* CONTENT AREA */
+.content-area{flex:1;overflow:hidden;display:flex;gap:0}
+
+/* FINDINGS PANEL */
+.findings-panel{flex:1;overflow-y:auto;padding:14px 18px}
+.findings-panel::-webkit-scrollbar{width:4px}
+.findings-panel::-webkit-scrollbar-track{background:var(--bg1)}
+.findings-panel::-webkit-scrollbar-thumb{background:var(--green4);border-radius:2px}
+
+.panel-hdr{
+  font-family:var(--mono);font-size:8px;letter-spacing:3px;color:var(--gray2);
+  margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+}
+.panel-hdr .ph-count{margin-left:auto;color:var(--gray3)}
+
+.filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.ftab{
+  font-family:var(--mono);font-size:9px;letter-spacing:1px;
+  padding:4px 12px;border-radius:20px;cursor:pointer;
+  border:1px solid var(--border2);color:var(--gray2);background:transparent;
+  transition:all .15s;
+}
+.ftab.active,.ftab:hover{border-color:var(--green2);color:var(--green);background:var(--green-glow)}
+
+/* FINDING CARD */
+.fcard{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  margin-bottom:7px;overflow:hidden;transition:border-color .15s;
+}
+.fcard:hover{border-color:var(--border2)}
+.fcard-hdr{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;cursor:pointer;user-select:none;
+}
+.sev-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.fcard-title{font-family:var(--display);font-size:13px;font-weight:600;flex:1;color:var(--text)}
+.fcat-badge{font-family:var(--mono);font-size:8px;padding:2px 7px;border-radius:3px}
+.cat-general{background:rgba(41,182,246,.1);color:var(--blue)}
+.cat-anticheat{background:rgba(229,57,53,.1);color:var(--red)}
+.cat-economy{background:rgba(255,193,7,.1);color:var(--yellow)}
+.cat-config{background:rgba(122,154,122,.1);color:var(--gray)}
+.cat-gameengine{background:rgba(0,230,100,.1);color:var(--green)}
+.fscore{font-family:var(--mono);font-size:9px;color:var(--gray2);background:var(--bg3);padding:2px 8px;border-radius:3px}
+.fchev{font-size:8px;color:var(--gray3)}
+
+.fcard-body{display:none;padding:0 14px 13px;border-top:1px solid var(--border)}
+.fcard-body.open{display:block}
+.fmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.mpill{font-family:var(--mono);font-size:8px;padding:2px 8px;background:var(--bg3);border-radius:3px;color:var(--gray2)}
+.fdesc{font-family:var(--display);font-size:12px;color:var(--text2);line-height:1.7;margin-top:9px}
+.fsim{background:var(--bg3);border-left:2px solid var(--red);padding:8px 12px;border-radius:0 4px 4px 0;margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--gray);line-height:1.6}
+.ftriage{background:var(--bg3);border-left:2px solid var(--green2);padding:8px 12px;border-radius:0 4px 4px 0;margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--green3);line-height:1.6}
+.flocs{margin-top:9px}
+.lloc{font-family:var(--mono);font-size:9px;color:var(--gray2);padding:4px 8px;background:var(--bg3);border-radius:3px;margin-top:3px;display:flex;gap:8px;align-items:center;overflow:hidden}
+.lloc-line{color:var(--green2);flex-shrink:0}
+.lloc-file{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lloc-match{color:var(--orange);flex-shrink:0}
+
+/* RIGHT PANEL */
+.right-panel{
+  width:200px;min-width:200px;background:var(--bg1);
+  border-left:1px solid var(--border);
+  overflow-y:auto;padding:12px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.right-panel::-webkit-scrollbar{width:3px}
+.right-panel::-webkit-scrollbar-thumb{background:var(--green4)}
+
+.rp-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:11px 12px}
+.rp-title{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--gray2);margin-bottom:9px}
+
+/* TERMINAL */
+.term-line{font-family:var(--mono);font-size:9px;color:var(--green3);padding:2px 0;display:flex;gap:6px;align-items:baseline}
+.term-prompt{color:var(--gray3)}
+.term-ok{color:var(--green)}
+.term-warn{color:var(--orange)}
+.term-err{color:var(--red)}
+.term-cursor{display:inline-block;width:6px;height:11px;background:var(--green);animation:blink 1s step-end infinite;margin-left:2px;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* GAUGE */
+.gauge-num{font-family:var(--mono);font-size:32px;font-weight:700;text-align:center;line-height:1}
+.gauge-sub{font-family:var(--mono);font-size:8px;color:var(--gray2);text-align:center;margin-top:3px;letter-spacing:2px}
+.gauge-bar{height:4px;background:var(--bg3);border-radius:2px;margin-top:10px;overflow:hidden}
+.gauge-fill{height:100%;border-radius:2px;transition:width .5s}
+
+/* SURFACE ROWS */
+.surf-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+.surf-row:last-child{border-bottom:none}
+.surf-cat{font-family:var(--mono);font-size:8px;color:var(--gray2);flex:1}
+.surf-count{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)}
+.surf-bar{height:2px;background:var(--bg3);border-radius:1px;margin-top:3px;overflow:hidden}
+.surf-fill{height:100%;border-radius:1px;background:var(--green3)}
+
+/* UPLOAD ZONE */
+.drop-zone{
+  background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--radius);
+  padding:16px 12px;text-align:center;cursor:pointer;
+  font-family:var(--mono);font-size:9px;color:var(--gray2);
+  transition:all .2s;
+}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--green2);color:var(--green);background:var(--green-glow)}
+.drop-icon{font-size:20px;margin-bottom:7px;color:var(--green2)}
+.drop-fname{font-family:var(--mono);font-size:9px;color:var(--green);margin-top:6px;display:none}
+
+/* PROGRESS */
+.prog-wrap{display:none;margin-top:2px}
+.prog-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--green2);border-radius:2px;transition:width .4s;box-shadow:0 0 6px rgba(0,230,100,0.4)}
+.prog-lbl{font-family:var(--mono);font-size:8px;color:var(--gray2);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* UPLOAD SECTION */
+.upload-section{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:0;
+  padding:30px;
+}
+.upload-big{
+  background:var(--bg2);border:1px dashed var(--border2);border-radius:10px;
+  padding:48px 40px;text-align:center;cursor:pointer;width:100%;max-width:440px;
+  transition:all .2s;position:relative;
+}
+.upload-big:hover,.upload-big.drag{border-color:var(--green2);background:var(--green-glow)}
+.upload-big input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.ub-icon{font-size:44px;color:var(--green2);margin-bottom:14px}
+.ub-title{font-family:var(--display);font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px}
+.ub-sub{font-family:var(--mono);font-size:10px;color:var(--gray2)}
+.ub-fname{font-family:var(--mono);font-size:10px;color:var(--green);margin-top:12px;display:none}
+.ub-btn{
+  margin-top:16px;padding:12px 32px;
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:2px;
+  background:var(--green);color:#000;border:none;border-radius:var(--radius);
+  cursor:pointer;transition:all .2s;box-shadow:0 0 14px rgba(0,230,100,.3);
+}
+.ub-btn:hover{background:#1aff7a;box-shadow:0 0 22px rgba(0,230,100,.45)}
+.ub-btn:disabled{background:var(--bg4);color:var(--gray3);cursor:not-allowed;box-shadow:none}
+.ub-prog{width:100%;max-width:440px;margin-top:14px;display:none}
+.ub-prog-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.ub-prog-fill{height:100%;background:var(--green2);border-radius:2px;transition:width .4s;box-shadow:0 0 6px rgba(0,230,100,.4)}
+.ub-prog-lbl{font-family:var(--mono);font-size:9px;color:var(--gray2);margin-top:6px}
+.ub-error{width:100%;max-width:440px;margin-top:12px;padding:10px 14px;background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.3);border-radius:var(--radius);font-family:var(--mono);font-size:9px;color:var(--red);display:none}
+
+/* RESULTS HIDDEN */
+.results-view{display:none;flex:1;overflow:hidden;flex-direction:column}
+.results-view.active{display:flex}
+
+/* HISTORY */
+.history-view{display:none;flex:1;overflow-y:auto;padding:16px 18px}
+.history-view.active{display:block}
+.history-view::-webkit-scrollbar{width:4px}
+.history-view::-webkit-scrollbar-thumb{background:var(--green4)}
+.hcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .15s}
+.hcard:hover{border-color:var(--border2)}
+.hcard-score{font-family:var(--mono);font-size:26px;font-weight:700;min-width:44px;text-align:center}
+.hcard-info{flex:1;overflow:hidden}
+.hcard-name{font-family:var(--display);font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hcard-meta{font-family:var(--mono);font-size:9px;color:var(--gray2);margin-top:3px}
+.hcard-dl{display:flex;gap:6px}
+.hcard-dl a{font-family:var(--mono);font-size:9px;padding:3px 9px;border:1px solid var(--border);border-radius:3px;color:var(--gray2);text-decoration:none;transition:all .15s}
+.hcard-dl a:hover{border-color:var(--green2);color:var(--green)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--gray3);font-family:var(--mono);font-size:11px}
+.empty-icon{font-size:36px;margin-bottom:12px;opacity:.4}
+
+/* DIFF VIEW */
+.diff-view{display:none;flex:1;overflow-y:auto;padding:16px 18px}
+.diff-view.active{display:block}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{width:180px;min-width:180px}
+  .right-panel{width:170px;min-width:170px}
+  .score-row{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:680px){
+  .sidebar{display:none}
+  .right-panel{display:none}
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fcard{animation:fadeIn .2s ease both}
+</style>
+</head>
+<body>
+
+<!-- ════════════ HEADER ════════════ -->
+<div class="header">
+  <a class="logo-wrap" href="#" onclick="goHome();return false">
+    <!-- CYBER VIPER SVG LOGO -->
+    <div class="logo-text">
+      <div class="lt-main">VENGAM</div>
+      <div class="lt-sub">AUDITOR</div>
+    </div>
+  </a>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="switchPage('scan',this)">SCAN</button>
+    <button class="nav-btn" onclick="switchPage('history',this)">HISTORY</button>
+    <button class="nav-btn" onclick="switchPage('diff',this)">DIFF</button>
+  </div>
+
+  <button class="scan-btn" onclick="goHome()">+ NEW SCAN</button>
+</div>
+
+<!-- ════════════ BODY ════════════ -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sb-section">FINDINGS</div>
+    <div class="sb-item active" id="sb-all" onclick="sbFilter('ALL',this)">
+      <span class="sb-icon">≡</span> All Findings
+      <span class="sb-badge" id="sb-badge-all">—</span>
+    </div>
+    <div class="sb-item" id="sb-crit" onclick="sbFilter('CRITICAL',this)">
+      <span class="sb-icon">●</span> Critical
+      <span class="sb-badge crit" id="sb-badge-crit">—</span>
+    </div>
+    <div class="sb-item" id="sb-high" onclick="sbFilter('HIGH',this)">
+      <span class="sb-icon">●</span> High
+      <span class="sb-badge high" id="sb-badge-high">—</span>
+    </div>
+    <div class="sb-item" id="sb-med" onclick="sbFilter('MEDIUM',this)">
+      <span class="sb-icon">●</span> Medium
+      <span class="sb-badge" id="sb-badge-med">—</span>
+    </div>
+    <div class="sb-item" id="sb-low" onclick="sbFilter('LOW',this)">
+      <span class="sb-icon">●</span> Low
+      <span class="sb-badge" id="sb-badge-low">—</span>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">CATEGORIES</div>
+    <div class="sb-item" onclick="sbCat('General',this)">
+      <span class="sb-icon">◈</span> General
+      <span class="sb-badge" id="sb-cat-gen">—</span>
+    </div>
+    <div class="sb-item" onclick="sbCat('AntiCheat',this)">
+      <span class="sb-icon">◈</span> AntiCheat
+      <span class="sb-badge" id="sb-cat-ac">—</span>
+    </div>
+    <div class="sb-item" onclick="sbCat('Economy',this)">
+      <span class="sb-icon">◈</span> Economy
+      <span class="sb-badge" id="sb-cat-eco">—</span>
+    </div>
+    <div class="sb-item" onclick="sbCat('Config',this)">
+      <span class="sb-icon">◈</span> Config
+      <span class="sb-badge" id="sb-cat-cfg">—</span>
+    </div>
+    <div class="sb-item" onclick="sbCat('GameEngine',this)">
+      <span class="sb-icon">◈</span> GameEngine
+      <span class="sb-badge" id="sb-cat-ge">—</span>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">REPORTS</div>
+    <div class="sb-item" id="dl-txt" onclick="dlReport('txt')"><span class="sb-icon">⚙</span> Text Report</div>
+    <div class="sb-item" id="dl-json" onclick="dlReport('json')"><span class="sb-icon">⚙</span> JSON Report</div>
+    <div class="sb-item" id="dl-sarif" onclick="dlReport('sarif')"><span class="sb-icon">⚙</span> SARIF Report</div>
+    <div class="sb-item" id="dl-pdf" onclick="dlReport('pdf')"><span class="sb-icon">⚙</span> PDF Report</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ══ SCAN PAGE ══ -->
+    <div id="page-scan" style="display:flex;flex:1;overflow:hidden;flex-direction:column">
+
+      <!-- UPLOAD VIEW -->
+      <div class="upload-section" id="upload-view">
+        <div class="upload-big" id="drop-big"
+          ondragover="e=>{e.preventDefault();this.classList.add('drag')}"
+          ondragleave="document.getElementById('drop-big').classList.remove('drag')"
+          ondrop="handleDrop(event)">
+          <input type="file" id="apk-input" accept=".apk,.ipa" onchange="handleFile(this.files[0])">
+          <div class="ub-icon">⬆</div>
+          <div class="ub-title">Drop APK or IPA here</div>
+          <div class="ub-sub">Click to browse or drag and drop your file</div>
+          <div class="ub-fname" id="ub-fname"></div>
+        </div>
+
+        <div style="width:100%;max-width:440px;display:flex;gap:10px;margin-top:10px">
+          <select id="plat-sel" style="flex:1;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:10px;padding:8px 12px;border-radius:var(--radius);cursor:pointer">
+            <option value="android">Android (.apk)</option>
+            <option value="ios">iOS (.ipa)</option>
+          </select>
+          <select id="sev-sel" style="flex:1;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:10px;padding:8px 12px;border-radius:var(--radius);cursor:pointer">
+            <option value="">All Severities</option>
+            <option value="CRITICAL">Critical Only</option>
+            <option value="CRITICAL,HIGH">Critical + High</option>
+          </select>
+        </div>
+
+        <button class="ub-btn" id="scan-go-btn" onclick="startScan()" disabled style="margin-top:10px;width:100%;max-width:440px">
+          RUN SECURITY AUDIT
+        </button>
+
+        <div class="ub-prog" id="ub-prog">
+          <div class="ub-prog-bar"><div class="ub-prog-fill" id="ub-prog-fill" style="width:0%"></div></div>
+          <div class="ub-prog-lbl" id="ub-prog-lbl">Initialising...</div>
+        </div>
+        <div class="ub-error" id="ub-error"></div>
+      </div>
+
+      <!-- RESULTS VIEW -->
+      <div class="results-view" id="results-view">
+
+        <!-- TOP BAR -->
+        <div class="topbar">
+          <div class="apk-info">
+            <div class="apk-name" id="res-name">—</div>
+            <div class="apk-meta" id="res-meta">—</div>
+          </div>
+          <div id="res-verdict" class="verdict-pill v-safe" style="display:none"></div>
+        </div>
+
+        <!-- SCORE ROW -->
+        <div class="score-row">
+          <div class="score-card">
+            <div class="score-val" id="sc-score">—</div>
+            <div class="score-lbl">RISK / 100</div>
+          </div>
+          <div class="score-card">
+            <div class="score-val" id="sc-crit" style="color:var(--red)">—</div>
+            <div class="score-lbl">CRITICAL</div>
+          </div>
+          <div class="score-card">
+            <div class="score-val" id="sc-high" style="color:var(--orange)">—</div>
+            <div class="score-lbl">HIGH</div>
+          </div>
+          <div class="score-card">
+            <div class="score-val" id="sc-fp" style="color:var(--green)">—</div>
+            <div class="score-lbl">FP SUPPRESSED</div>
+          </div>
+          <div class="score-card">
+            <div class="score-val" id="sc-dur" style="color:var(--gray2)">—</div>
+            <div class="score-lbl">SCAN TIME</div>
+          </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content-area">
+
+          <!-- FINDINGS -->
+          <div class="findings-panel">
+            <div class="panel-hdr">
+              STATIC FINDINGS
+              <span class="ph-count" id="ph-count">—</span>
+            </div>
+            <div class="filter-row">
+              <div class="ftab active" onclick="filterInline('ALL',this)">ALL</div>
+              <div class="ftab" onclick="filterInline('CRITICAL',this)">CRITICAL</div>
+              <div class="ftab" onclick="filterInline('HIGH',this)">HIGH</div>
+              <div class="ftab" onclick="filterInline('MEDIUM',this)">MEDIUM</div>
+              <div class="ftab" onclick="filterInline('LOW',this)">LOW</div>
+            </div>
+            <div id="findings-container"></div>
+          </div>
+
+          <!-- RIGHT PANEL -->
+          <div class="right-panel">
+
+            <!-- MINI TERMINAL -->
+            <div class="rp-card">
+              <div class="rp-title">TERMINAL</div>
+              <div id="term-output"></div>
+              <div class="term-cursor" id="term-cursor" style="display:none"></div>
+            </div>
+
+            <!-- RISK GAUGE -->
+            <div class="rp-card">
+              <div class="rp-title">RISK SCORE</div>
+              <div class="gauge-num" id="gauge-num">—</div>
+              <div class="gauge-sub">OUT OF 100</div>
+              <div class="gauge-bar">
+                <div class="gauge-fill" id="gauge-fill" style="width:0%"></div>
+              </div>
+            </div>
+
+            <!-- ATTACK SURFACE -->
+            <div class="rp-card">
+              <div class="rp-title">ATTACK SURFACE</div>
+              <div id="surface-rows"></div>
+            </div>
+
+            <!-- UPLOAD NEW -->
+            <div class="drop-zone" onclick="goHome()">
+              <div class="drop-icon">⬆</div>
+              <div>NEW SCAN</div>
+              <div style="margin-top:4px;font-size:8px">drop another file</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ HISTORY PAGE ══ -->
+    <div class="history-view" id="page-history">
+      <div class="panel-hdr" style="margin-bottom:14px">SCAN HISTORY <span class="ph-count" id="hist-count">0 scans</span></div>
+      <div id="history-container">
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div>No scans yet. Run your first audit from the Scan tab.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DIFF PAGE ══ -->
+    <div class="diff-view" id="page-diff">
+      <div class="panel-hdr" style="margin-bottom:14px">VERSION DIFF</div>
+      <div class="empty-state">
+        <div class="empty-icon">⇄</div>
+        <div>Diff scan compares two APK versions.<br>Run at least two scans first.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   VENGAM UI — JavaScript Engine
+═══════════════════════════════════════ */
+
+const API = '';  // same origin
+let currentFile = null;
+let currentScan = null;
+let scanHistory = JSON.parse(localStorage.getItem('vengam_history') || '[]');
+const SEV_COLOR = {CRITICAL:'#e53935',HIGH:'#ff8c00',MEDIUM:'#ffc107',LOW:'#29b6f6',INFO:'#7a9a7a'};
+const STEPS = [
+  'Uploading file to engine...','Decompiling with apktool...','Parsing Smali AST...',
+  'Running pattern engine (42 rules)...','Entropy analysis in progress...',
+  'Context-aware FP filter (v7)...','Mapping attack surface...','Generating reports...'
+];
+
+// ── PAGE ROUTING ─────────────────────────────────────────────────
+function switchPage(page, btn) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('page-scan').style.display = (page==='scan') ? 'flex' : 'none';
+  document.getElementById('page-history').style.display = (page==='history') ? 'block' : 'none';
+  document.getElementById('page-diff').style.display = (page==='diff') ? 'block' : 'none';
+  if (page === 'history') renderHistory();
+}
+
+function goHome() {
+  switchPage('scan', document.querySelector('.nav-btn'));
+  document.querySelector('.nav-btn').classList.add('active');
+  document.getElementById('upload-view').style.display = 'flex';
+  document.getElementById('results-view').classList.remove('active');
+  document.getElementById('ub-prog').style.display = 'none';
+  document.getElementById('ub-error').style.display = 'none';
+  document.getElementById('scan-go-btn').disabled = !currentFile;
+}
+
+// ── FILE HANDLING ─────────────────────────────────────────────────
+function handleFile(file) {
+  if (!file) return;
+  currentFile = file;
+  const fname = document.getElementById('ub-fname');
+  fname.textContent = '✓ ' + file.name;
+  fname.style.display = 'block';
+  document.getElementById('scan-go-btn').disabled = false;
+  // Auto-set platform
+  if (file.name.endsWith('.ipa')) document.getElementById('plat-sel').value = 'ios';
+  else document.getElementById('plat-sel').value = 'android';
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-big').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+}
+
+// ── SCAN ─────────────────────────────────────────────────────────
+async function startScan() {
+  if (!currentFile) return;
+  const btn    = document.getElementById('scan-go-btn');
+  const prog   = document.getElementById('ub-prog');
+  const fill   = document.getElementById('ub-prog-fill');
+  const lbl    = document.getElementById('ub-prog-lbl');
+  const errEl  = document.getElementById('ub-error');
+
+  btn.disabled = true;
+  prog.style.display = 'block';
+  errEl.style.display = 'none';
+  fill.style.width = '0%';
+
+  let stepIdx = 0;
+  const timer = setInterval(() => {
+    if (stepIdx < STEPS.length) {
+      lbl.textContent = STEPS[stepIdx];
+      fill.style.width = Math.round(((stepIdx+1)/STEPS.length)*90) + '%';
+      stepIdx++;
+    }
+  }, 2200);
+
+  try {
+    const fd = new FormData();
+    const platform = document.getElementById('plat-sel').value;
+    const sevFilter = document.getElementById('sev-sel').value;
+    fd.append('file', currentFile);
+    if (sevFilter) fd.append('severity_filter', sevFilter);
+
+    const endpoint = platform === 'ios' ? '/api/scan/ios' : '/api/scan/android';
+    const res = await fetch(API + endpoint, { method:'POST', body:fd });
+    clearInterval(timer);
+    fill.style.width = '100%';
+    lbl.textContent = 'Scan complete.';
+
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({detail:'Server error'}));
+      throw new Error(err.detail || 'Scan failed');
+    }
+    const data = await res.json();
+    currentScan = data;
+    // Save to history
+    scanHistory.unshift({
+      id:          data.scan_id,
+      name:        data.apk_name,
+      platform:    data.platform,
+      score:       data.risk_score,
+      verdict:     data.verdict,
+      ts:          new Date().toISOString(),
+      duration:    data.engine_stats?.scan_duration_sec || 0,
+      fp:          data.engine_stats?.fp_suppressed || 0,
+      report_links: data.report_links || {},
+    });
+    if (scanHistory.length > 50) scanHistory.pop();
+    localStorage.setItem('vengam_history', JSON.stringify(scanHistory));
+
+    setTimeout(() => showResults(data), 400);
+  } catch(err) {
+    clearInterval(timer);
+    prog.style.display = 'none';
+    errEl.textContent = '⚠ ' + err.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+  }
+}
+
+// ── RESULTS ──────────────────────────────────────────────────────
+function showResults(data) {
+  document.getElementById('upload-view').style.display = 'none';
+  document.getElementById('results-view').classList.add('active');
+
+  // Top bar
+  document.getElementById('res-name').textContent = data.apk_name;
+  const stats = data.engine_stats || {};
+  document.getElementById('res-meta').textContent =
+    `SHA-256: ${data.apk_sha256?.substring(0,24)}... · ${stats.files_scanned?.toLocaleString() || '?'} files · ${(stats.lines_scanned||0).toLocaleString()} lines`;
+
+  // Verdict
+  const vEl = document.getElementById('res-verdict');
+  vEl.textContent = data.verdict;
+  vEl.style.display = 'block';
+  vEl.className = 'verdict-pill ' +
+    (data.verdict==='BLOCK RELEASE' ? 'v-block' : data.verdict.includes('AT RISK') ? 'v-risk' : 'v-safe');
+
+  // Score row
+  const crit = (data.findings||[]).filter(f=>f.severity==='CRITICAL').length;
+  const high = (data.findings||[]).filter(f=>f.severity==='HIGH').length;
+  const sc   = data.risk_score || 0;
+  const scEl = document.getElementById('sc-score');
+  scEl.textContent  = sc;
+  scEl.style.color  = sc>=75 ? '#e53935' : sc>=40 ? '#ff8c00' : '#00e664';
+  document.getElementById('sc-crit').textContent = crit;
+  document.getElementById('sc-high').textContent = high;
+  document.getElementById('sc-fp').textContent   = (stats.fp_suppressed||0).toLocaleString();
+  document.getElementById('sc-dur').textContent  = (stats.scan_duration_sec||0).toFixed(1)+'s';
+
+  // Sidebar badges
+  const findings = data.findings || [];
+  updateBadges(findings);
+
+  // Gauge
+  document.getElementById('gauge-num').textContent = sc;
+  document.getElementById('gauge-num').style.color = sc>=75 ? '#e53935' : sc>=40 ? '#ff8c00' : '#00e664';
+  const gf = document.getElementById('gauge-fill');
+  gf.style.width = sc + '%';
+  gf.style.background = sc>=75 ? '#e53935' : sc>=40 ? '#ff8c00' : '#00e664';
+
+  // Attack surface
+  const surf = data.attack_surface || {};
+  const surfRows = document.getElementById('surface-rows');
+  const maxRoutes = Math.max(
+    surf.auth?.length||0, surf.payment?.length||0,
+    surf.user_data?.length||0, surf.internal_api?.length||0, surf.other?.length||0, 1
+  );
+  surfRows.innerHTML = [
+    ['AUTH',     surf.auth],
+    ['PAYMENT',  surf.payment],
+    ['USER DATA',surf.user_data],
+    ['API',      surf.internal_api],
+    ['OTHER',    surf.other],
+  ].filter(([,r])=>r?.length>0).map(([cat,r])=>`
+    <div class="surf-row">
+      <div><div class="surf-cat">${cat}</div>
+      <div class="surf-bar"><div class="surf-fill" style="width:${Math.round((r.length/maxRoutes)*100)}%"></div></div></div>
+      <div class="surf-count">${r.length}</div>
+    </div>
+  `).join('');
+
+  // Terminal
+  renderTerminal(data, stats);
+
+  // Render findings
+  renderFindings(findings, 'ALL');
+
+  // DL links
+  const rl = data.report_links || {};
+  document.getElementById('dl-txt').onclick   = () => rl.txt   ? window.open(API+rl.txt)   : alert('No text report');
+  document.getElementById('dl-json').onclick  = () => rl.json  ? window.open(API+rl.json)  : alert('No JSON report');
+  document.getElementById('dl-sarif').onclick = () => rl.sarif ? window.open(API+rl.sarif) : alert('No SARIF report');
+}
+
+function updateBadges(findings) {
+  const counts = {ALL:0,CRITICAL:0,HIGH:0,MEDIUM:0,LOW:0};
+  const cats = {General:0,AntiCheat:0,Economy:0,Config:0,GameEngine:0};
+  findings.forEach(f => {
+    counts.ALL++;
+    counts[f.severity] = (counts[f.severity]||0)+1;
+    if (cats[f.category]!==undefined) cats[f.category]++;
+  });
+  document.getElementById('sb-badge-all').textContent  = counts.ALL;
+  document.getElementById('sb-badge-crit').textContent = counts.CRITICAL;
+  document.getElementById('sb-badge-high').textContent = counts.HIGH;
+  document.getElementById('sb-badge-med').textContent  = counts.MEDIUM;
+  document.getElementById('sb-badge-low').textContent  = counts.LOW;
+  document.getElementById('sb-cat-gen').textContent  = cats.General;
+  document.getElementById('sb-cat-ac').textContent   = cats.AntiCheat;
+  document.getElementById('sb-cat-eco').textContent  = cats.Economy;
+  document.getElementById('sb-cat-cfg').textContent  = cats.Config;
+  document.getElementById('sb-cat-ge').textContent   = cats.GameEngine;
+}
+
+function renderTerminal(data, stats) {
+  const out = document.getElementById('term-output');
+  const lines = [
+    {t:'prompt', v:'$ vengam -t ' + (data.apk_name||'game.apk')},
+    {t:'ok',     v:'✓ apktool OK'},
+    {t:'ok',     v:'✓ ' + (stats.files_scanned||0).toLocaleString() + ' files'},
+    {t:'ok',     v:'✓ ' + ((stats.lines_scanned||0)/1e6).toFixed(1) + 'M lines'},
+    {t:'ok',     v:'✓ ' + (stats.fp_suppressed||0).toLocaleString() + ' FP suppressed'},
+    {t:(data.findings?.length>0?'warn':'ok'),
+                 v:(data.findings?.length>0?'! ':'✓ ') + (data.findings?.length||0) + ' findings'},
+    {t:(data.verdict==='BLOCK RELEASE'?'err': data.verdict.includes('AT RISK')?'warn':'ok'),
+                 v:(data.verdict==='BLOCK RELEASE'?'✗ BLOCK RELEASE':
+                    data.verdict.includes('AT RISK')?'! AT RISK':'✓ SAFE')},
+  ];
+  out.innerHTML = lines.map(l=>`
+    <div class="term-line">
+      ${l.t==='prompt'
+        ? `<span class="term-prompt">$</span><span style="color:var(--text2)">${esc(l.v.slice(2))}</span>`
+        : `<span class="term-${l.t}">${esc(l.v)}</span>`}
+    </div>
+  `).join('');
+}
+
+function renderFindings(findings, filter) {
+  const container = document.getElementById('findings-container');
+  const filtered = filter === 'ALL' ? findings : findings.filter(f=>f.severity===filter);
+  document.getElementById('ph-count').textContent = filtered.length + ' findings';
+
+  if (!filtered.length) {
+    container.innerHTML = `<div style="color:var(--gray3);font-family:var(--mono);font-size:10px;padding:20px 0">No findings for this filter.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map((f, i) => {
+    const dot  = SEV_COLOR[f.severity] || '#7a9a7a';
+    const glow = f.severity==='CRITICAL' ? `box-shadow:0 0 6px ${dot}` : '';
+    const catCls= 'cat-'+(f.category||'general').toLowerCase();
+    const locs = (f.locations||[]).slice(0,5).map(l=>`
+      <div class="lloc">
+        <span class="lloc-line">:${l.line}</span>
+        <span class="lloc-file">${esc(l.file)}</span>
+        ${l.redacted_match ? `<span class="lloc-match">${esc(l.redacted_match)}</span>` : ''}
+      </div>`).join('');
+    const cvss  = f.cvss_vector ? `<span class="mpill">CVSS</span>` : '';
+    const cweEl = f.cwe_id     ? `<span class="mpill">${esc(f.cwe_id)}</span>` : '';
+    const owEl  = f.owasp_ref  ? `<span class="mpill">${esc(f.owasp_ref)}</span>` : '';
+    const triage= f.triage_note ? `<div class="ftriage">▶ ${esc(f.triage_note)}</div>` : '';
+
+    return `
+    <div class="fcard" data-sev="${f.severity}" data-cat="${f.category||'General'}">
+      <div class="fcard-hdr" onclick="toggle(this)">
+        <div class="sev-dot" style="background:${dot};${glow}"></div>
+        <span class="fcard-title">${esc(f.title)}</span>
+        <span class="fcat-badge ${catCls}">${esc(f.category||'General')}</span>
+        <span class="fscore">+${f.score_value}pts</span>
+        <span class="fchev">▼</span>
+      </div>
+      <div class="fcard-body">
+        <div class="fmeta">
+          <span class="mpill">Confidence: ${esc(f.confidence)}</span>
+          <span class="mpill">Exploitability: ${esc(f.exploitability)}</span>
+          ${cweEl}${owEl}${cvss}
+        </div>
+        <div class="fdesc">${esc(f.description)}</div>
+        <div class="fsim">⚔ ${esc(f.simulation)}</div>
+        ${triage}
+        ${locs ? `<div class="flocs">${locs}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggle(hdr) {
+  const body = hdr.nextElementSibling;
+  const chev = hdr.querySelector('.fchev');
+  const open = body.classList.toggle('open');
+  if (chev) chev.textContent = open ? '▲' : '▼';
+}
+
+function filterInline(sev, el) {
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  if (!currentScan) return;
+  renderFindings(currentScan.findings || [], sev);
+}
+
+function sbFilter(sev, el) {
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  if (!currentScan) return;
+  const findings = currentScan.findings || [];
+  const filtered = sev==='ALL' ? findings : findings.filter(f=>f.severity===sev);
+  renderFindings(filtered, 'ALL');
+  document.getElementById('ph-count').textContent = filtered.length + ' findings';
+}
+
+function sbCat(cat, el) {
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  if (!currentScan) return;
+  const filtered = (currentScan.findings||[]).filter(f=>f.category===cat);
+  renderFindings(filtered, 'ALL');
+}
+
+// ── HISTORY ──────────────────────────────────────────────────────
+function renderHistory() {
+  const container = document.getElementById('history-container');
+  document.getElementById('hist-count').textContent = scanHistory.length + ' scans';
+  if (!scanHistory.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div>No scans yet.</div></div>`;
+    return;
+  }
+  container.innerHTML = scanHistory.map(s => {
+    const sc = s.score || 0;
+    const color = sc>=75?'#e53935':sc>=40?'#ff8c00':'#00e664';
+    const vCls = s.verdict==='BLOCK RELEASE'?'v-block':s.verdict?.includes('AT RISK')?'v-risk':'v-safe';
+    const ts = new Date(s.ts).toLocaleString('tr-TR');
+    const rl = s.report_links || {};
+    const dlLinks = Object.entries({txt:'TXT',json:'JSON',sarif:'SARIF'})
+      .filter(([k])=>rl[k])
+      .map(([k,l])=>`<a href="${API+rl[k]}" download>${l}</a>`).join('');
+    return `
+    <div class="hcard">
+      <div class="hcard-score" style="color:${color}">${sc}</div>
+      <div class="hcard-info">
+        <div class="hcard-name">${esc(s.name)}</div>
+        <div class="hcard-meta">${s.platform?.toUpperCase()} · ${ts} · ${s.duration?.toFixed(1)||'?'}s · ${(s.fp||0).toLocaleString()} FP</div>
+      </div>
+      <div class="verdict-pill ${vCls}" style="font-size:8px;padding:3px 8px">${esc(s.verdict)}</div>
+      <div class="hcard-dl">${dlLinks}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── REPORTS ──────────────────────────────────────────────────────
+function dlReport(fmt) {
+  if (!currentScan?.report_links?.[fmt]) {
+    alert('Run a scan first to generate reports.');
+    return;
+  }
+  window.open(API + currentScan.report_links[fmt]);
+}
+
+// ── UTIL ─────────────────────────────────────────────────────────
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

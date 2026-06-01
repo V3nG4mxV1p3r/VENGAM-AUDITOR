@@ -1,0 +1,115 @@
+# VENGAM — Community Rules: Multiplayer Security
+---
+id: VENGAM-MP-001
+title: "Client-Authoritative Game State"
+description: >
+  Oyun durumu (pozisyon, can, hasar) yalnızca client tarafından belirleniyor.
+  Sunucu client verilerini doğrulamadan kabul ediyor.
+severity: CRITICAL
+confidence: MEDIUM
+category: Economy
+platform: both
+tags: [multiplayer, client-authority, game-state, cheat]
+score_value: 30
+
+detection:
+  patterns:
+    - '(?i)(client[_\s]?(authorit|trusted|side[_\s]?position|side[_\s]?health))'
+    - '(?i)(trustClientPosition|acceptClientState|clientDrivenPhysics)'
+    - '(?i)(TRUST_CLIENT|CLIENT_AUTHORITATIVE)\s*[=:]\s*(true|1)'
+  file_ext: [.smali, .java, .kt, .cs, .json, .yml]
+
+context:
+  require_keywords: [game, player, position, state, server, sync]
+  exclude_paths: [test, sample]
+
+simulation: >
+  Saldırgan Frida ile pozisyon verilerini sonsuz hız/can olarak değiştirir.
+  Sunucu doğrulaması olmadığı için diğer oyuncular da bu durumu görür.
+triage_note: >
+  Kritik oyun durumu (pozisyon, can, hasar) SUNUCU tarafında hesaplanmalı.
+  Client sadece input göndermeli, state'i sunucudan almalı.
+frida_hook: |
+  Java.perform(function() {
+    ['sendPosition','updateHealth','syncState','pushGameState'].forEach(function(m) {
+      Java.enumerateLoadedClasses({
+        onMatch: function(name) {
+          try {
+            var C = Java.use(name);
+            if (C[m]) {
+              C[m].overloads.forEach(function(o) {
+                o.implementation = function() {
+                  send({tag:'GAME_STATE', msg:name+'.'+m+' called with: '+JSON.stringify(Array.from(arguments))});
+                  return o.apply(this, arguments);
+                };
+              });
+            }
+          } catch(_) {}
+        }, onComplete: function(){}
+      });
+    });
+  });
+cvss_vector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+cwe_id: "CWE-602"
+owasp_ref: "M1: Improper Platform Usage"
+
+---
+id: VENGAM-MP-002
+title: "Unsigned Multiplayer Message"
+description: >
+  Çok oyunculu mesajlar imzasız veya doğrulamasız gönderiliyor.
+  Mesaj sahteciliği (packet injection) mümkün.
+severity: HIGH
+confidence: MEDIUM
+category: Economy
+platform: both
+tags: [multiplayer, message-signing, packet-injection]
+score_value: 20
+
+detection:
+  patterns:
+    - '(?i)(send[_\s]?message|send[_\s]?packet)[^;]*(unsigned|no[_\s]?sign|without[_\s]?hmac)'
+    - '(?i)(PhotonNetwork\.SendOperation|sendUnreliable|sendReliable)[^;]{0,100}(unsigned|raw)'
+    - '(?i)(RPC|rpc)[^;]*(unsigned|unauthenticated|no[_\s]?verify)'
+
+simulation: >
+  Saldırgan özel istemci yazarak imzasız paket gönderir.
+  Sunucu paketi kabul eder; oyuncu konumu, hasar, para birimi manipüle edilir.
+triage_note: >
+  Tüm çok oyunculu mesajlar HMAC-SHA256 ile imzalanmalı.
+  Sunucu her mesajın kaynağını ve bütünlüğünü doğrulamalı.
+cvss_vector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+cwe_id: "CWE-345"
+owasp_ref: "M5: Insufficient Cryptography"
+
+---
+id: VENGAM-MP-003
+title: "Room/Lobby ID Predictable or Exposed"
+description: >
+  Oyun odası veya lobi ID'si tahmin edilebilir veya düz metin loglanıyor.
+  Yetkisiz kullanıcılar özel odalara katılabilir.
+severity: MEDIUM
+confidence: MEDIUM
+category: GameEngine
+platform: both
+tags: [multiplayer, room-id, photon, lobby, enumeration]
+score_value: 15
+
+detection:
+  patterns:
+    - '(?i)(room[_\s]?id|lobby[_\s]?id|session[_\s]?id)\s*[=:]\s*["\']?[0-9]{4,8}["\']?'
+    - '(?i)Log\.(d|i|v|w|e)\([^)]*?(roomId|lobbyId|sessionId)[^)]*\)'
+    - '(?i)(createRoom|joinRoom)[^;]*(roomName|roomId)\s*[=:]\s*["\'][0-9]+'
+
+context:
+  exclude_paths: [test, sample]
+
+simulation: >
+  Saldırgan log'lardan veya APK'dan oda ID formatını öğrenir,
+  brute-force ile private odalara katılır.
+triage_note: >
+  Oda ID'leri UUID/random olmalı, log'a yazılmamalı.
+  Private odalar şifre veya davet sistemiyle korunmalı.
+cvss_vector: "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:M/I:M/A:N"
+cwe_id: "CWE-330"
+owasp_ref: "M4: Insecure Authentication"

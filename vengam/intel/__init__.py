@@ -1,0 +1,1 @@
+"""VENGAM — Intelligence module"""

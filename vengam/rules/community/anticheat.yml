@@ -1,0 +1,127 @@
+# VENGAM — Community Rules: Anti-Cheat
+---
+id: VENGAM-AC-001
+title: "Speed Hack Detection Bypass"
+description: >
+  Oyunun hız kontrolü devre dışı bırakılmış veya bypass edilebilir.
+  speedHack, timeScale, deltaTime manipülasyonu tespit edildi.
+severity: HIGH
+confidence: MEDIUM
+category: AntiCheat
+platform: android
+tags: [anticheat, speedhack, timescale]
+score_value: 22
+
+detection:
+  patterns:
+    - '(?i)(speed[_\s]?hack|speedhack)[_\s]?(allow|enable|bypass|disabled)\s*[=:]\s*(true|1)'
+    - '(?i)(Time\.timeScale|setTimeScale|deltaTime[_\s]?multiplier)\s*[=:]\s*[0-9]'
+    - '(?i)(bypass[_\s]?speed|disable[_\s]?speed[_\s]?check)'
+  file_ext: [.smali, .java, .kt, .cs]
+
+context:
+  exclude_paths: [androidx, test, junit]
+
+simulation: >
+  Saldırgan timeScale değerini 10x yaparak oyunu hızlandırır.
+  Sunucu-taraflı zaman doğrulaması yoksa tüm hız kısıtlamaları aşılır.
+triage_note: >
+  Tüm zamanlama kritik aksiyonlar sunucu tarafında doğrulanmalı.
+  Client-side timeScale kontrolüne güvenilmemeli.
+frida_hook: |
+  Java.perform(function() {
+    try {
+      var Unity = Java.use('com.unity3d.player.UnityPlayer');
+      send({tag:'UNITY_TIMESCALE', msg:'Unity player class found'});
+    } catch(_) {}
+  });
+cvss_vector: "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+cwe_id: "CWE-693"
+owasp_ref: "M8: Code Tampering"
+
+---
+id: VENGAM-AC-002
+title: "Wallhack / NoClip Flag"
+description: >
+  Duvar geçme veya çarpışma devre dışı bırakma flag'i tespit edildi.
+  noClip, wallhack, ignoreCollision gibi değişkenler runtime'da aktifleştirilebilir.
+severity: HIGH
+confidence: MEDIUM
+category: AntiCheat
+platform: android
+tags: [anticheat, wallhack, noclip, collision]
+score_value: 20
+
+detection:
+  patterns:
+    - '(?i)(no[_\s]?clip|wallhack|wall[_\s]?hack)\s*[=:]\s*(true|1|enabled)'
+    - '(?i)(ignore[_\s]?collision|disable[_\s]?collision|collision[_\s]?disabled)'
+    - '(?i)(NOCLIP_MODE|WALLHACK_ENABLED)\s*[=:]\s*(true|1)'
+  file_ext: [.smali, .java, .kt, .cs]
+
+context:
+  require_keywords: [game, player, collision, physics]
+  exclude_paths: [androidx, test]
+
+simulation: >
+  Saldırgan noClip flag'ini aktifleştirir, duvarlardan geçer,
+  diğer oyuncuların konumunu görebilir (wallhack).
+triage_note: >
+  Tüm pozisyon doğrulaması sunucu tarafında yapılmalı.
+  Fizik hesaplamaları client'a bırakılmamalı.
+cvss_vector: "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:M/I:H/A:N"
+cwe_id: "CWE-489"
+owasp_ref: "M10: Extraneous Functionality"
+
+---
+id: VENGAM-AC-003
+title: "Memory Hack Protection Disabled"
+description: >
+  Bellek koruma mekanizması devre dışı veya zayıflatılmış.
+  memoryProtection, antiTamper, integrityCheck gibi kontroller bypass edilebilir.
+severity: CRITICAL
+confidence: MEDIUM
+category: AntiCheat
+platform: android
+tags: [anticheat, memory-hack, tamper-detection]
+score_value: 30
+
+detection:
+  patterns:
+    - '(?i)(memory[_\s]?protection|anti[_\s]?tamper|tamper[_\s]?detect)\s*[=:]\s*(false|0|disabled)'
+    - '(?i)(integrity[_\s]?check[_\s]?(disabled|off|false|bypass))'
+    - '(?i)(DISABLE_MEMORY_PROTECTION|SKIP_INTEGRITY_CHECK)\s*[=:]\s*(true|1)'
+  file_ext: [.smali, .java, .kt]
+
+context:
+  exclude_paths: [androidx, test, debug]
+
+simulation: >
+  Saldırgan GameGuardian/Cheat Engine ile bellek değerlerini değiştirir.
+  Koruma devre dışı olduğu için değişiklikler tespit edilmez.
+triage_note: >
+  Play Integrity API kullan. Bellek bütünlüğünü periyodik sunucu kontrolüyle doğrula.
+frida_hook: |
+  Java.perform(function() {
+    ['checkIntegrity','verifyMemory','detectTamper','isMemoryModified'].forEach(function(m) {
+      Java.enumerateLoadedClasses({
+        onMatch: function(name) {
+          try {
+            var C = Java.use(name);
+            if (C[m]) {
+              C[m].overloads.forEach(function(o) {
+                o.implementation = function() {
+                  var r = o.apply(this, arguments);
+                  send({tag:'INTEGRITY', msg:name+'.'+m+'() = '+r});
+                  return r;
+                };
+              });
+            }
+          } catch(_) {}
+        }, onComplete: function(){}
+      });
+    });
+  });
+cvss_vector: "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:N"
+cwe_id: "CWE-693"
+owasp_ref: "M8: Code Tampering"

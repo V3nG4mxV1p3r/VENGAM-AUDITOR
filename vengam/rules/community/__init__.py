@@ -1,0 +1,1 @@
+"""VENGAM — Community rules"""

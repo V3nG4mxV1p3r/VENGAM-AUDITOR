@@ -1,0 +1,159 @@
+# ═══════════════════════════════════════════════════════
+# VENGAM Auditor — Example CI/CD Workflow
+# Copy → .github/workflows/vengam-scan.yml
+# ═══════════════════════════════════════════════════════
+
+name: VENGAM Security Scan
+
+on:
+  push:
+    branches: [main, release/*, hotfix/*]
+    paths:
+      - '**.apk'
+      - '**.ipa'
+      - 'app/**'
+      - 'src/**'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      apk_path:
+        description: 'APK path (relative to repo root)'
+        required: true
+        default:  'app/build/outputs/apk/release/app-release.apk'
+      fail_on:
+        description: 'Fail policy'
+        required: false
+        default:  'BLOCK_RELEASE'
+        type: choice
+        options: [BLOCK_RELEASE, AT_RISK, NEVER]
+
+jobs:
+
+  # ── Android Security Scan ──
+  android-scan:
+    name: Android APK Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write   # SARIF upload
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build APK (adjust to your build system)
+        run: |
+          # Gradle örneği:
+          # ./gradlew assembleRelease
+          # Flutter örneği:
+          # flutter build apk --release
+          echo "Build step — kendi build komutunuzu buraya ekleyin."
+
+      - name: VENGAM Security Scan
+        id: vengam
+        uses: ./phantom-action
+        with:
+          apk_path:        ${{ github.event.inputs.apk_path || 'app/build/outputs/apk/release/app-release.apk' }}
+          platform:        android
+          severity_filter: ''
+          category_filter: ''
+          fail_on:         ${{ github.event.inputs.fail_on || 'BLOCK_RELEASE' }}
+          output_dir:      vengam-reports
+          upload_sarif:    'true'
+
+      - name: Post scan summary to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const score   = '${{ steps.vengam.outputs.risk_score }}';
+            const verdict = '${{ steps.vengam.outputs.verdict }}';
+            const count   = '${{ steps.vengam.outputs.findings_count }}';
+            const emoji   = verdict === 'BLOCK RELEASE' ? '🔴' :
+                            verdict.includes('AT RISK')  ? '🟠' : '✅';
+            const body = [
+              '## VENGAM Auditor',
+              '',
+              `${emoji} **Verdict:** ${verdict}`,
+              `📊 **Risk Score:** ${score} / 100`,
+              `🔍 **Findings:** ${count}`,
+              '',
+              '> Full reports available in the **Actions artifacts** tab.',
+            ].join('\n');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner:        context.repo.owner,
+              repo:         context.repo.repo,
+              body,
+            });
+
+  # ── iOS Security Scan ──
+  ios-scan:
+    name: iOS IPA Security Scan
+    runs-on: macos-latest
+    if: false   # Aktifleştirmek için: if: github.ref == 'refs/heads/main'
+    permissions:
+      security-events: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: VENGAM iOS Scan
+        uses: ./phantom-action
+        with:
+          apk_path:     app/build/MyGame.ipa
+          platform:     ios
+          fail_on:      BLOCK_RELEASE
+          output_dir:   vengam-reports-ios
+          upload_sarif: 'true'
+
+  # ── Diff Scan ──
+  diff-scan:
+    name: Version Diff Scan
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/release/')
+    needs: android-scan
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install VENGAM
+        run: pip install --quiet vengam-gamesec 2>/dev/null || pip install --quiet -e . 2>/dev/null || true
+
+      - name: Download previous release APK
+        run: |
+          echo "Download your previous release APK here."
+          echo "Example: gh release download v1.0.0 --pattern '*.apk' --dir old/"
+
+      - name: Run Diff Scan
+        run: |
+          python -c "
+          from vengam.reports.diff_report import generate_diff
+          generate_diff('old/app-release.apk', 'app/build/outputs/apk/release/app-release.apk', 'diff-reports/')
+          " || echo "Diff scan skipped — old APK not available."
+
+      - name: Upload diff reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name:           vengam-diff-reports
+          path:           diff-reports/
+          retention-days: 30

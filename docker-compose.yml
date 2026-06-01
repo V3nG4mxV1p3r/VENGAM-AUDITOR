@@ -1,0 +1,51 @@
+# ═══════════════════════════════════════════════════════
+# VENGAM Auditor — Docker Compose
+# Services: api + web (nginx)
+# ═══════════════════════════════════════════════════════
+
+version: '3.9'
+
+services:
+
+  # ── FastAPI Backend ───────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: vengam-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      VENGAM_APKTOOL:     /usr/local/lib/apktool.jar
+      VENGAM_REPORTS_DIR: /app/vengam_reports
+      VENGAM_DB:          /app/data/vengam_scans.db
+      PYTHONUNBUFFERED:   "1"
+    volumes:
+      - vengam_reports:/app/vengam_reports
+      - vengam_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── React Frontend (nginx) ────────────────────────────
+  web:
+    image: nginx:alpine
+    container_name: vengam-web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    volumes:
+      - ./phantom-web/dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  vengam_reports:
+  vengam_data:

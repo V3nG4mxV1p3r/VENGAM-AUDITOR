@@ -1,0 +1,7 @@
+{
+  "admin": {
+    "password_hash": "sha256$abed27c094aff0ab770a7a40a5b35cc2$6d85a3eb99f06c1756b445f2379242ee4f86153e6533aadebe4ff016262e0289",
+    "role": "admin",
+    "created_at": "2026-05-27T22:23:39.439132+00:00"
+  }
+}

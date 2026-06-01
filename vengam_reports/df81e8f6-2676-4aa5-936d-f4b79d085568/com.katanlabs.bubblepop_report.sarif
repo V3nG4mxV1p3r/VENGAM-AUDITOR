@@ -1,0 +1,504 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "VENGAM Auditor",
+          "version": "7.0.0",
+          "informationUri": "https://github.com/vengam/gamesec",
+          "rules": [
+            {
+              "id": "GoogleFirebaseAPIKey",
+              "name": "Google / Firebase API Key",
+              "shortDescription": {
+                "text": "Google / Firebase API Key"
+              },
+              "fullDescription": {
+                "text": "A Google/Firebase API key embedded in the binary may grant access to Firebase RTDB, Cloud Storage, or GCP services based on IAM permissions."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "general"
+                ],
+                "precision": "high",
+                "security-severity": "9.8"
+              }
+            },
+            {
+              "id": "DebugGodModeFlag",
+              "name": "Debug / God Mode Flag",
+              "shortDescription": {
+                "text": "Debug / God Mode Flag"
+              },
+              "fullDescription": {
+                "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "anticheat"
+                ],
+                "precision": "medium",
+                "security-severity": "7.5"
+              }
+            },
+            {
+              "id": "ExportedComponentWithoutPermissi",
+              "name": "Exported Component Without Permission",
+              "shortDescription": {
+                "text": "Exported Component Without Permission"
+              },
+              "fullDescription": {
+                "text": "Activity/Service/Provider exported without a permission guard. Other apps can invoke it directly."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "config"
+                ],
+                "precision": "medium",
+                "security-severity": "5.0"
+              }
+            },
+            {
+              "id": "UnclassifiedHighEntropyAsset",
+              "name": "Unclassified High-Entropy Asset",
+              "shortDescription": {
+                "text": "Unclassified High-Entropy Asset"
+              },
+              "fullDescription": {
+                "text": "High Shannon entropy string detected near security-sensitive keyword."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "general"
+                ],
+                "precision": "low",
+                "security-severity": "5.0"
+              }
+            },
+            {
+              "id": "InsecureRandomNumberGenerator",
+              "name": "Insecure Random Number Generator",
+              "shortDescription": {
+                "text": "Insecure Random Number Generator"
+              },
+              "fullDescription": {
+                "text": "java.util.Random or Math.random() used in a security context — not cryptographically secure."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "general"
+                ],
+                "precision": "medium",
+                "security-severity": "2.0"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "GoogleFirebaseAPIKey",
+          "level": "error",
+          "message": {
+            "text": "A Google/Firebase API key embedded in the binary may grant access to Firebase RTDB, Cloud Storage, or GCP services based on IAM permissions. | Attacker calls Firebase REST API to attempt unauthenticated read/write on the database."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "assets/google-services-desktop.json"
+                },
+                "region": {
+                  "startLine": 32
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "GoogleFirebaseAPIKey",
+          "level": "error",
+          "message": {
+            "text": "A Google/Firebase API key embedded in the binary may grant access to Firebase RTDB, Cloud Storage, or GCP services based on IAM permissions. | Attacker calls Firebase REST API to attempt unauthenticated read/write on the database."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "res/values/strings.xml"
+                },
+                "region": {
+                  "startLine": 135
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "GoogleFirebaseAPIKey",
+          "level": "error",
+          "message": {
+            "text": "A Google/Firebase API key embedded in the binary may grant access to Firebase RTDB, Cloud Storage, or GCP services based on IAM permissions. | Attacker calls Firebase REST API to attempt unauthenticated read/write on the database."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "res/values/strings.xml"
+                },
+                "region": {
+                  "startLine": 137
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DebugGodModeFlag",
+          "level": "error",
+          "message": {
+            "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime. | Attacker locates the memory address and toggles the flag for unfair advantage."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/androidx/constraintlayout/motion/widget/DesignTool.smali"
+                },
+                "region": {
+                  "startLine": 2438
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DebugGodModeFlag",
+          "level": "error",
+          "message": {
+            "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime. | Attacker locates the memory address and toggles the flag for unfair advantage."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/androidx/constraintlayout/motion/widget/MotionController.smali"
+                },
+                "region": {
+                  "startLine": 5252
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DebugGodModeFlag",
+          "level": "error",
+          "message": {
+            "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime. | Attacker locates the memory address and toggles the flag for unfair advantage."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/androidx/constraintlayout/motion/widget/MotionLayout.smali"
+                },
+                "region": {
+                  "startLine": 5800
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DebugGodModeFlag",
+          "level": "error",
+          "message": {
+            "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime. | Attacker locates the memory address and toggles the flag for unfair advantage."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/androidx/constraintlayout/motion/widget/MotionLayout.smali"
+                },
+                "region": {
+                  "startLine": 8666
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DebugGodModeFlag",
+          "level": "error",
+          "message": {
+            "text": "Debug gameplay flags (god mode, infinite resources) found. May be activatable at runtime. | Attacker locates the memory address and toggles the flag for unfair advantage."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali/androidx/constraintlayout/motion/widget/MotionLayout.smali"
+                },
+                "region": {
+                  "startLine": 8673
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "ExportedComponentWithoutPermissi",
+          "level": "warning",
+          "message": {
+            "text": "Activity/Service/Provider exported without a permission guard. Other apps can invoke it directly. | Attacker app invokes the exported component with crafted Intent to access game data."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "AndroidManifest.xml"
+                },
+                "region": {
+                  "startLine": 69
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "ExportedComponentWithoutPermissi",
+          "level": "warning",
+          "message": {
+            "text": "Activity/Service/Provider exported without a permission guard. Other apps can invoke it directly. | Attacker app invokes the exported component with crafted Intent to access game data."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "AndroidManifest.xml"
+                },
+                "region": {
+                  "startLine": 93
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "ExportedComponentWithoutPermissi",
+          "level": "warning",
+          "message": {
+            "text": "Activity/Service/Provider exported without a permission guard. Other apps can invoke it directly. | Attacker app invokes the exported component with crafted Intent to access game data."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "AndroidManifest.xml"
+                },
+                "region": {
+                  "startLine": 94
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "ExportedComponentWithoutPermissi",
+          "level": "warning",
+          "message": {
+            "text": "Activity/Service/Provider exported without a permission guard. Other apps can invoke it directly. | Attacker app invokes the exported component with crafted Intent to access game data."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "AndroidManifest.xml"
+                },
+                "region": {
+                  "startLine": 107
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "ExportedComponentWithoutPermissi",
+          "level": "warning",
+          "message": {
+            "text": "Activity/Service/Provider exported without a permission guard. Other apps can invoke it directly. | Attacker app invokes the exported component with crafted Intent to access game data."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "AndroidManifest.xml"
+                },
+                "region": {
+                  "startLine": 190
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "UnclassifiedHighEntropyAsset",
+          "level": "warning",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker reverse-engineers data to determine if it acts as seed or endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes2/com/bytedance/sdk/openadsdk/component/reward/to.smali"
+                },
+                "region": {
+                  "startLine": 16
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "UnclassifiedHighEntropyAsset",
+          "level": "warning",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker reverse-engineers data to determine if it acts as seed or endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes3/com/google/android/gms/internal/ads/zzawy.smali"
+                },
+                "region": {
+                  "startLine": 456
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "UnclassifiedHighEntropyAsset",
+          "level": "warning",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker reverse-engineers data to determine if it acts as seed or endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes3/com/google/android/gms/internal/ads/zzawy.smali"
+                },
+                "region": {
+                  "startLine": 548
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "UnclassifiedHighEntropyAsset",
+          "level": "warning",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker reverse-engineers data to determine if it acts as seed or endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes3/com/google/android/gms/internal/ads/zzawy.smali"
+                },
+                "region": {
+                  "startLine": 625
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "UnclassifiedHighEntropyAsset",
+          "level": "warning",
+          "message": {
+            "text": "High Shannon entropy string detected near security-sensitive keyword. | Attacker reverse-engineers data to determine if it acts as seed or endpoint."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes3/com/google/android/gms/internal/ads/zzawy.smali"
+                },
+                "region": {
+                  "startLine": 682
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "InsecureRandomNumberGenerator",
+          "level": "note",
+          "message": {
+            "text": "java.util.Random or Math.random() used in a security context — not cryptographically secure. | Attacker predicts token generation sequence or game seed."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes2/com/bytedance/sdk/openadsdk/core/fs/mzz.smali"
+                },
+                "region": {
+                  "startLine": 303
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "InsecureRandomNumberGenerator",
+          "level": "note",
+          "message": {
+            "text": "java.util.Random or Math.random() used in a security context — not cryptographically secure. | Attacker predicts token generation sequence or game seed."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smali_classes6/yads/qu3.smali"
+                },
+                "region": {
+                  "startLine": 289
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
