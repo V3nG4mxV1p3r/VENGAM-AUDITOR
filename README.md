@@ -21,18 +21,6 @@
 
 ---
 
-## 📸 Screenshots
-
-<div align="center">
-
-| Web Dashboard | Finding Detail | Scan Results |
-|---|---|---|
-| Upload & Scan | Triage Guidance | Risk Score |
-
-</div>
-
----
-
 ## 🎯 Why VENGAM?
 
 Existing mobile security tools (MobSF, NowSecure, Oversecured) are general-purpose and fall short when it comes to game-specific vulnerabilities. VENGAM is designed from the ground up for game security researchers:
