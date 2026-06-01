@@ -153,7 +153,8 @@ cd vengam-auditor
 # 2. Install apktool (required for Android analysis)
 # Windows:
 mkdir C:\apktool
-curl -L https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.9.3.jar -o C:\apktool\apktool.jar
+curl.exe -L -o apktool.jar https://github.com/iBotPeaches/Apktool/releases/latest/download/apktool.jar
+curl.exe -L -o apktool.bat https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat
 
 # Linux/macOS:
 mkdir -p ~/apktool
